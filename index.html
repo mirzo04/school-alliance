@@ -47,7 +47,8 @@ footer{text-align:center;color:#718096;font-size:11px;padding:15px}
 </form>
 <p id="firebaseAuthStatus" class="muted" role="status">Подключение к Firebase…</p>
 <button id="firebaseLogout" class="tab" type="button" hidden>Выйти</button>
-<p class="muted">Пока подключена только проверка входа. Роли, школьные профили и доступ к данным ещё не реализованы.</p>
+<p id="firestoreRoleStatus" class="muted" role="status">Проверка профиля пользователя…</p>
+<p class="muted">Эта версия проверяет чтение собственной записи роли из Firestore. Это не выдаёт административные полномочия и не открывает доступ к школьным данным.</p>
 </section>
 
 <section id="register" class="card">
@@ -121,6 +122,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TIhA",
@@ -135,20 +137,37 @@ const firebaseConfig = {
 const status = document.getElementById("firebaseAuthStatus");
 const form = document.getElementById("firebaseLoginForm");
 const logout = document.getElementById("firebaseLogout");
+const roleStatus = document.getElementById("firestoreRoleStatus");
 
 try {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
 
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     if (user) {
       status.textContent = "Вы вошли как: " + user.email;
       form.hidden = true;
       logout.hidden = false;
+      roleStatus.textContent = "Проверяем вашу запись роли в Firestore…";
+      try {
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists()) {
+          const role = userSnap.data().role;
+          roleStatus.textContent = role === "platform_admin"
+            ? "В Firestore найдена роль platform_admin. Это пока только проверка записи; защищённые административные действия ещё не включены."
+            : "Запись пользователя найдена. Назначенная роль: " + String(role || "не указана") + ".";
+        } else {
+          roleStatus.textContent = "В Firestore пока нет записи для этой учётной записи.";
+        }
+      } catch (error) {
+        roleStatus.textContent = "Не удалось прочитать профиль Firestore. Проверьте правила доступа. Код: " + (error.code || error.message);
+      }
     } else {
       status.textContent = "Вы не вошли. Используйте созданную тестовую учётную запись.";
       form.hidden = false;
       logout.hidden = true;
+      roleStatus.textContent = "Войдите, чтобы проверить запись роли.";
     }
   });
 
