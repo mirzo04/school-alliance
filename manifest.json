@@ -1,0 +1,9 @@
+{
+  "name": "School Alliance",
+  "short_name": "School Alliance",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f5fa",
+  "theme_color": "#102748",
+  "description": "Платформа школьного управления"
+}
