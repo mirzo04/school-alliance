@@ -146,10 +146,10 @@ try {
 
   onAuthStateChanged(auth, async user => {
     if (user) {
-      status.textContent = "Вы вошли как: " + user.email;
+      status.textContent = "Вы вошли как: " + user.email + "\nUID этой учётной записи: " + user.uid;
       form.hidden = true;
       logout.hidden = false;
-      roleStatus.textContent = "Проверяем вашу запись роли в Firestore…";
+      roleStatus.textContent = "Проверяем путь: проект " + firebaseConfig.projectId + " → коллекция users → документ с UID этой учётной записи…";
       try {
         const userSnap = await getDoc(doc(db, "users", user.uid));
         if (userSnap.exists()) {
