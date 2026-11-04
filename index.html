@@ -122,7 +122,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TIhA",
@@ -151,7 +151,7 @@ try {
       logout.hidden = false;
       roleStatus.textContent = "Проверяем путь: проект " + firebaseConfig.projectId + " → коллекция users → документ с UID этой учётной записи…";
       try {
-        const userSnap = await getDoc(doc(db, "users", user.uid));
+        const userSnap = await getDocFromServer(doc(db, "users", user.uid));
         if (userSnap.exists()) {
           const role = userSnap.data().role;
           roleStatus.textContent = role === "platform_admin"
