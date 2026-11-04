@@ -142,7 +142,7 @@ const roleStatus = document.getElementById("firestoreRoleStatus");
 try {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getFirestore(app);
+  const db = getFirestore(app, "(default)");
 
   onAuthStateChanged(auth, async user => {
     if (user) {
