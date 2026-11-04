@@ -151,15 +151,28 @@ try {
       logout.hidden = false;
       roleStatus.textContent = "Проверяем путь: проект " + firebaseConfig.projectId + " → коллекция users → документ с UID этой учётной записи…";
       try {
-        const userSnap = await getDocFromServer(doc(db, "users", user.uid));
-        if (userSnap.exists()) {
-          const role = userSnap.data().role;
-          roleStatus.textContent = role === "platform_admin"
-            ? "В Firestore найдена роль platform_admin. Это пока только проверка записи; защищённые административные действия ещё не включены."
-            : "Запись пользователя найдена. Назначенная роль: " + String(role || "не указана") + ".";
-        } else {
-          roleStatus.textContent = "В Firestore пока нет записи для этой учётной записи.";
-        }
+        const userRef = doc(db, "users", user.uid);
+
+roleStatus.textContent =
+  "Проверяем документ: " + userRef.path +
+  " | UID: " + user.uid +
+  " | Проект: " + firebaseConfig.projectId;
+
+const userSnap = await getDocFromServer(userRef);
+
+if (userSnap.exists()) {
+  const userData = userSnap.data();
+  const role = userData.role;
+
+  roleStatus.textContent =
+    "ДОКУМЕНТ НАЙДЕН! Путь: " + userRef.path +
+    " | Роль: " + String(role || "не указана");
+} else {
+  roleStatus.textContent =
+    "ДОКУМЕНТ НЕ НАЙДЕН! Путь: " + userRef.path +
+    " | UID: " + user.uid +
+    " | Проект: " + firebaseConfig.projectId;
+}
       } catch (error) {
         roleStatus.textContent = "Не удалось прочитать профиль Firestore. Проверьте правила доступа. Код: " + (error.code || error.message);
       }
