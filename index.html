@@ -187,7 +187,32 @@ $('schoolForm').onsubmit = async e => {
       'Ошибка отправки заявки: ' + (error.code || error.message);
   }
 };
-document.addEventListener('click',e=>{let a=e.target.closest('[data-approve]'),r=e.target.closest('[data-reject]');if(a){let x=requests.find(x=>x.id===Number(a.dataset.approve));if(x)x.status='approved'}if(r){let x=requests.find(x=>x.id===Number(r.dataset.reject));if(x)x.status='rejected'}if(a||r){save();renderAdmin()}});
+document.addEventListener('click', async e => {
+  let a = e.target.closest('[data-approve]');
+  let r = e.target.closest('[data-reject]');
+
+  if (!a && !r) return;
+
+  let id = a ? a.dataset.approve : r.dataset.reject;
+  let newStatus = a ? 'approved' : 'rejected';
+
+  try {
+    await updateDoc(doc(db, 'schoolRequests', id), {
+      status: newStatus
+    });
+
+    await loadRequests();
+
+    $('feedback').textContent =
+      newStatus === 'approved'
+        ? 'Школа успешно подтверждена!'
+        : 'Заявка отклонена.';
+
+  } catch (error) {
+    $('feedback').textContent =
+      'Ошибка изменения заявки: ' + (error.code || error.message);
+  }
+});
 if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 translate();
 </script>
