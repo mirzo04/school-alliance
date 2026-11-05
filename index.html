@@ -265,7 +265,12 @@ try {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app, "(default)");
-
+window.db = db;
+window.getDocs = getDocs;
+window.collection = collection;
+window.addDoc = addDoc;
+window.updateDoc = updateDoc;
+window.doc = doc;
   onAuthStateChanged(auth, async user => {
   const adminTab = document.querySelector('[data-page="admin"]');
 
