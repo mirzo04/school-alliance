@@ -97,7 +97,23 @@ $('langBtn').textContent=lang==='ru'?'Тоҷикӣ':'Русский';renderAdmin
 }
 function save(){localStorage.setItem('sa_requests',JSON.stringify(requests))}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderAdmin(){
+async function loadRequests(){
+  try {
+    const snapshot = await getDocs(collection(db, 'schoolRequests'));
+
+    requests = snapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data()
+    }));
+
+    renderAdmin();
+
+  } catch (error) {
+    $('pendingList').textContent =
+      'Ошибка загрузки заявок: ' + (error.code || error.message);
+  }
+}
+  function renderAdmin(){
   let t = copy[lang];
 
   let p = requests.filter(x => x.status === 'pending');
