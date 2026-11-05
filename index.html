@@ -246,44 +246,64 @@ try {
   const db = getFirestore(app, "(default)");
 
   onAuthStateChanged(auth, async user => {
-    if (user) {
-      status.textContent = "Вы вошли как: " + user.email + "\nUID этой учётной записи: " + user.uid;
-      form.hidden = true;
-      logout.hidden = false;
-      roleStatus.textContent = "Проверяем путь: проект " + firebaseConfig.projectId + " → коллекция users → документ с UID этой учётной записи…";
-      try {
-        const userRef = doc(db, "users", user.uid);
+  const adminTab = document.querySelector('[data-page="admin"]');
 
-roleStatus.textContent =
-  "Проверяем документ: " + userRef.path +
-  " | UID: " + user.uid +
-  " | Проект: " + firebaseConfig.projectId;
+  if (user) {
+    status.textContent =
+      "Вы вошли как: " + user.email +
+      "\nUID: " + user.uid;
 
-const userSnap = await getDocFromServer(userRef);
+    form.hidden = true;
+    logout.hidden = false;
 
-if (userSnap.exists()) {
-  const userData = userSnap.data();
-  const role = userData.role;
+    if (adminTab) adminTab.hidden = true;
 
-  roleStatus.textContent =
-    "ДОКУМЕНТ НАЙДЕН! Путь: " + userRef.path +
-    " | Роль: " + String(role || "не указана");
-} else {
-  roleStatus.textContent =
-    "ДОКУМЕНТ НЕ НАЙДЕН! Путь: " + userRef.path +
-    " | UID: " + user.uid +
-    " | Проект: " + firebaseConfig.projectId;
-}
-      } catch (error) {
-        roleStatus.textContent = "Не удалось прочитать профиль Firestore. Проверьте правила доступа. Код: " + (error.code || error.message);
+    roleStatus.textContent = "Проверяем роль пользователя...";
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDocFromServer(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const role = userData.role;
+
+        roleStatus.textContent =
+          "Профиль найден! Роль: " + String(role || "не указана");
+
+        if (adminTab) {
+          adminTab.hidden = role !== "platform_admin";
+        }
+
+        if (role === "platform_admin") {
+          roleStatus.textContent =
+            "Вы вошли как главный администратор School Alliance!";
+        }
+
+      } else {
+        roleStatus.textContent = "Профиль пользователя не найден.";
+        if (adminTab) adminTab.hidden = true;
       }
-    } else {
-      status.textContent = "Вы не вошли. Используйте созданную тестовую учётную запись.";
-      form.hidden = false;
-      logout.hidden = true;
-      roleStatus.textContent = "Войдите, чтобы проверить запись роли.";
+
+    } catch (error) {
+      roleStatus.textContent =
+        "Ошибка проверки роли: " + (error.code || error.message);
+
+      if (adminTab) adminTab.hidden = true;
     }
-  });
+
+  } else {
+    status.textContent =
+      "Вы не вошли. Используйте тестовую учётную запись.";
+
+    form.hidden = false;
+    logout.hidden = true;
+
+    roleStatus.textContent = "Войдите, чтобы проверить запись роли.";
+
+    if (adminTab) adminTab.hidden = true;
+  }
+});
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
