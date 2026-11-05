@@ -219,11 +219,31 @@ document.addEventListener('click', async e => {
   let newStatus = a ? 'approved' : 'rejected';
 
   try {
-    await updateDoc(doc(db, 'schoolRequests', id), {
-      status: newStatus
-    });
+    const requestData = requests.find(x => x.id === id);
 
-    await loadRequests();
+if (!requestData) {
+  throw new Error('Заявка не найдена');
+}
+
+await updateDoc(doc(db, 'schoolRequests', id), {
+  status: newStatus
+});
+
+if (newStatus === 'approved') {
+  await setDoc(doc(db, 'schools', id), {
+    name: requestData.name,
+    type: requestData.type,
+    region: requestData.region,
+    district: requestData.district,
+    address: requestData.address,
+    director: requestData.director,
+    phone: requestData.phone,
+    status: 'approved',
+    requestId: id
+  });
+}
+
+await loadRequests();
 
     $('feedback').textContent =
       newStatus === 'approved'
