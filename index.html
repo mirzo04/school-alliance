@@ -111,7 +111,35 @@ $('tabLogin').classList.add('active');
 $('firebaseLogin').hidden=false;
 };
 $('langBtn').onclick=()=>{lang=lang==='ru'?'tj':'ru';translate()};
-$('schoolForm').onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);requests.push({id:Date.now(),name:f.get('name'),type:f.get('type'),region:f.get('region'),district:f.get('district'),address:f.get('address'),director:f.get('director'),phone:f.get('phone'),status:'pending'});save();$('feedback').textContent=copy[lang].success;e.target.reset();renderAdmin()};
+$('schoolForm').onsubmit = async e => {
+  e.preventDefault();
+
+  const f = new FormData(e.target);
+
+  const application = {
+    name: f.get('name'),
+    type: f.get('type'),
+    region: f.get('region'),
+    district: f.get('district'),
+    address: f.get('address'),
+    director: f.get('director'),
+    phone: f.get('phone'),
+    status: 'pending'
+  };
+
+  try {
+    await addDoc(collection(db, 'schoolRequests'), application);
+
+    $('feedback').textContent =
+      'Заявка успешно отправлена! Она ожидает подтверждения администратора.';
+
+    e.target.reset();
+
+  } catch (error) {
+    $('feedback').textContent =
+      'Ошибка отправки заявки: ' + (error.code || error.message);
+  }
+};
 document.addEventListener('click',e=>{let a=e.target.closest('[data-approve]'),r=e.target.closest('[data-reject]');if(a){let x=requests.find(x=>x.id===Number(a.dataset.approve));if(x)x.status='approved'}if(r){let x=requests.find(x=>x.id===Number(r.dataset.reject));if(x)x.status='rejected'}if(a||r){save();renderAdmin()}});
 if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 translate();
