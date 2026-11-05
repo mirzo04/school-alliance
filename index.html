@@ -150,7 +150,7 @@ async function loadRequests(){
     `).join('')
     : t.none;
   }
-document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x===b));['register','admin','about'].forEach(id=>$(id).hidden=id!==b.dataset.page);if(b.dataset.page==='admin')renderAdmin()});
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x===b));['register','admin','about'].forEach(id=>$(id).hidden=id!==b.dataset.page);if(b.dataset.page==='admin')loadRequests()
 $('tabLogin').onclick=()=>{
 document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('active'));
 $('tabLogin').classList.add('active');
