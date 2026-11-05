@@ -264,7 +264,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDocFromServer, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDocFromServer, collection, getDocs, addDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TIhA",
@@ -291,6 +291,7 @@ window.collection = collection;
 window.addDoc = addDoc;
 window.updateDoc = updateDoc;
 window.doc = doc;
+window.setDoc = setDoc; 
   onAuthStateChanged(auth, async user => {
   const adminTab = document.querySelector('[data-page="admin"]');
 
