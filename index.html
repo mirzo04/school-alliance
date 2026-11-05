@@ -98,11 +98,42 @@ $('langBtn').textContent=lang==='ru'?'Тоҷикӣ':'Русский';renderAdmin
 function save(){localStorage.setItem('sa_requests',JSON.stringify(requests))}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderAdmin(){
-let t=copy[lang],p=requests.filter(x=>x.status==='pending'),a=requests.filter(x=>x.status==='approved');
-$('pendingCount').textContent=p.length;$('approvedCount').textContent=a.length;
-$('pendingList').innerHTML=p.length?p.map(x=>`<div class="item"><b>${esc(x.name)}</b><div class="muted">${esc(x.region)} · ${esc(x.district)}<br>${esc(x.director)} · ${esc(x.phone)}</div><div class="row" style="justify-content:flex-start;margin-top:8px"><button class="primary smallbtn" data-approve="${x.id}">${t.approve}</button><button class="tab smallbtn" data-reject="${x.id}">${t.reject}</button></div></div>`).join(''):t.none;
-$('approvedList').innerHTML=a.length?a.map(x=>`<div class="item">🏫 <b>${esc(x.name)}</b><div class="muted">${esc(x.region)} · ${esc(x.district)}</div><span class="badge">${t.approvedStatus}</span></div>`).join(''):t.none;
-}
+  let t = copy[lang];
+
+  let p = requests.filter(x => x.status === 'pending');
+  let a = requests.filter(x => x.status === 'approved');
+
+  $('pendingCount').textContent = p.length;
+  $('approvedCount').textContent = a.length;
+
+  $('pendingList').innerHTML = p.length
+    ? p.map(x => `
+      <div class="item">
+        <b>${esc(x.name)}</b>
+        <div class="muted">
+          ${esc(x.region)} · ${esc(x.district)}<br>
+          ${esc(x.director)} · ${esc(x.phone)}
+        </div>
+        <div class="row" style="justify-content:flex-start;margin-top:8px">
+          <button class="primary smallbtn" data-approve="${esc(x.id)}">${t.approve}</button>
+          <button class="tab smallbtn" data-reject="${esc(x.id)}">${t.reject}</button>
+        </div>
+      </div>
+    `).join('')
+    : t.none;
+
+  $('approvedList').innerHTML = a.length
+    ? a.map(x => `
+      <div class="item">
+        🏫 <b>${esc(x.name)}</b>
+        <div class="muted">
+          ${esc(x.region)} · ${esc(x.district)}
+        </div>
+        <span class="badge">${t.approvedStatus}</span>
+      </div>
+    `).join('')
+    : t.none;
+  }
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x===b));['register','admin','about'].forEach(id=>$(id).hidden=id!==b.dataset.page);if(b.dataset.page==='admin')renderAdmin()});
 $('tabLogin').onclick=()=>{
 document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('active'));
