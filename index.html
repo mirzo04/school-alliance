@@ -128,6 +128,35 @@ document.querySelectorAll("[data-approve]").forEach(b=>b.addEventListener("click
 document.querySelectorAll("[data-reject]").forEach(b=>b.addEventListener("click",()=>changeStatus(b.dataset.reject,"rejected")));
 $("adminError").hidden=true;
 }catch(err){status("adminError","Ошибка загрузки заявок: "+err.message);}}
+  async function loadDirectors(){
+  if(currentRole!=="platform_admin")return;
+
+  try{
+    const snap=await getDocs(collection(db,"schools"));
+    const schools=snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .filter(s=>s.status==="approved");
+
+    $("directorsList").innerHTML=schools.length
+      ?schools.map(s=>`
+        <article class="card">
+          <p><strong>${esc(s.name)}</strong></p>
+          <p>Директор: ${esc(s.director||"Не указан")}</p>
+          <p>Телефон директора: ${esc(s.phone||"Не указан")}</p>
+          <button type="button" class="primary"
+            data-edit-director="${esc(s.id)}">
+            Изменить данные директора
+          </button>
+        </article>
+      `).join("")
+      :"Подтверждённых школ пока нет.";
+
+    $("directorsError").hidden=true;
+
+  }catch(err){
+    status("directorsError","Ошибка загрузки директоров: "+err.message);
+  }
+  }
 async function changeStatus(id,newStatus){if(currentRole!=="platform_admin"||!currentUser)return;if(!confirm(newStatus==="approved"?t("approveAsk"):t("rejectAsk")))return;
 try{let ref=doc(db,"schoolRequests",id),snap=await getDoc(ref);if(!snap.exists())throw Error("Заявка не найдена");let d=snap.data(),batch=writeBatch(db);batch.update(ref,{status:newStatus});
 if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.type,region:d.region,district:d.district,address:d.address,director:d.director,phone:d.phone,status:"approved",requestId:id});
