@@ -1,391 +1,114 @@
 <!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#102748">
-<title>School Alliance</title>
-<link rel="manifest" href="manifest.json">
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#153b67"><title>School Alliance</title><link rel="manifest" href="./manifest.json">
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172337;background:#f2f5fa}
-*{box-sizing:border-box}body{margin:0}.wrap{max-width:760px;margin:auto;padding:14px}
-header{background:linear-gradient(135deg,#102748,#1d609e);color:white;border-radius:18px;padding:20px}
-h1{font-size:25px;margin:4px 0}.sub{opacity:.82;font-size:13px}
-nav{display:flex;gap:7px;margin:13px 0;flex-wrap:wrap}
-button,.tab{border:0;border-radius:10px;padding:11px 13px;font-weight:650;cursor:pointer}
-.tab{background:white;color:#18314f;border:1px solid #dce3ed}.tab.active,.primary{background:#1d5fa5;color:white}
-.card{background:white;border:1px solid #e0e6ef;border-radius:14px;padding:15px;margin:10px 0}
-label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}
-input,select{width:100%;padding:12px;border:1px solid #cfd8e5;border-radius:9px;background:#fff;font:inherit}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#eef4fc;padding:13px;border-radius:11px}
-.muted{color:#66758a;font-size:13px}.row{display:flex;justify-content:space-between;gap:8px;align-items:center}
-.badge{font-size:11px;background:#fff2d9;color:#79510a;padding:4px 8px;border-radius:20px}
-.item{border-top:1px solid #e7ebf1;padding:12px 0}.smallbtn{padding:7px 10px;font-size:12px}
-footer{text-align:center;color:#718096;font-size:11px;padding:15px}
-[hidden]{display:none!important}
-</style>
-</head>
-<body><main class="wrap">
-<header><div class="row"><div><div class="sub">ЕДИНАЯ ОБРАЗОВАТЕЛЬНАЯ ПЛАТФОРМА</div><h1>🏫 SCHOOL ALLIANCE</h1><div class="sub" id="tagline">Школы объединяются в одной системе</div></div><div style="font-size:38px">🇹🇯</div></div></header>
-<nav>
-<button class="tab active" data-page="register" id="tabReg">Регистрация школы</button>
-<button class="tab" data-page="admin" id="tabAdmin">Администратор</button>
-<button class="tab" data-page="about" id="tabAbout">О проекте</button>
-<button class="tab" id="tabLogin" type="button">Вход</button>
-<button class="tab" id="langBtn">Тоҷикӣ</button>
-</nav>
+*{box-sizing:border-box}body{margin:0;font:16px Arial,sans-serif;background:#f3f6fb;color:#17243a}
+header{background:#153b67;color:white;padding:24px 16px}main,.wrap{max-width:1000px;margin:auto;padding:0 16px}
+header .wrap{padding:0}h1{margin:8px 0;font-size:clamp(28px,5vw,40px)}nav{display:flex;flex-wrap:wrap;gap:8px;padding:14px 0}
+button{border:0;border-radius:9px;padding:11px 14px;font-weight:bold;cursor:pointer;background:#e4ebf5;color:#173b60}
+button.primary{background:#1d5f9e;color:white}button.danger{background:#fae6e6;color:#8b2020}
+button:disabled{opacity:.5}.tab.active{background:#153b67;color:white}.panel{background:white;border-radius:14px;padding:20px;margin:8px 0 18px;box-shadow:0 4px 18px #153b6712}
+.page[hidden]{display:none}.muted{color:#65758a;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+label{display:block;font-weight:bold;font-size:14px;margin:12px 0 6px}input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+textarea{min-height:70px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.status{background:#edf4fb;padding:12px;border-radius:9px;white-space:pre-wrap;overflow-wrap:anywhere}
+.card{border:1px solid #dce5ef;border-radius:10px;padding:13px;margin:10px 0}.card p{margin:6px 0;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#edf4fb;border-radius:10px;padding:14px}.stat strong{display:block;font-size:26px;color:#153b67}
+footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-width:520px){.panel{padding:15px}}
+</style></head><body>
+<header><div class="wrap"><small>ЕДИНАЯ ОБРАЗОВАТЕЛЬНАЯ ПЛАТФОРМА</small><h1>SCHOOL ALLIANCE</h1><p>Школы объединяются в одной системе</p></div></header>
+<main><nav>
+<button class="tab active" data-page="register">Регистрация школы</button>
+<button class="tab" data-page="about">О проекте</button>
+<button class="tab" data-page="login">Вход</button>
+<button class="tab" data-page="admin" id="tabAdmin" hidden>Администратор</button>
+<button class="tab" data-page="director" id="tabDirector" hidden>Кабинет директора</button>
+<button id="languageButton">Тоҷикӣ</button></nav>
 
-<section id="firebaseLogin" class="card" hidden>
-<h2>Вход в School Alliance</h2>
-<p class="muted">Войдите с тестовой учётной записью, созданной в Firebase Authentication.</p>
-<form id="firebaseLoginForm">
-<label for="firebaseEmail">Электронная почта</label>
-<input id="firebaseEmail" type="email" autocomplete="username" required placeholder="name@example.com">
-<label for="firebasePassword">Пароль</label>
-<input id="firebasePassword" type="password" autocomplete="current-password" required>
-<button class="primary" type="submit">Войти</button>
-</form>
-<p id="firebaseAuthStatus" class="muted" role="status">Подключение к Firebase…</p>
-<button id="firebaseLogout" class="tab" type="button" hidden>Выйти</button>
-<p id="firestoreRoleStatus" class="muted" role="status">Проверка профиля пользователя…</p>
-<p class="muted">Эта версия проверяет чтение собственной записи роли из Firestore. Это не выдаёт административные полномочия и не открывает доступ к школьным данным.</p>
-</section>
+<section class="page panel" id="page-register"><h2>Заявка на подключение школы</h2>
+<p class="muted">Заполните форму. Заявка будет ожидать ручного подтверждения главным администратором.</p>
+<form id="schoolForm"><div class="grid">
+<div><label for="schoolName">Название школы *</label><input id="schoolName" required maxlength="160" placeholder="Например, Средняя школа №15"></div>
+<div><label for="schoolType">Тип учреждения</label><select id="schoolType"><option>Средняя школа</option><option>Лицей</option><option>Гимназия</option><option>Колледж</option><option>Другое</option></select></div>
+<div><label for="region">Регион / город *</label><select id="region" required><option value="">Выберите регион</option><option>Душанбе</option><option>Согдийская область</option><option>Хатлонская область</option><option>ГБАО</option><option>Районы республиканского подчинения</option></select></div>
+<div><label for="district">Район *</label><input id="district" required maxlength="120" placeholder="Пянджский район"></div>
+<div><label for="directorName">ФИО директора *</label><input id="directorName" required maxlength="160"></div>
+<div><label for="phone">Телефон *</label><input id="phone" required type="tel" maxlength="40" placeholder="+992 ..."></div></div>
+<label for="address">Адрес школы</label><textarea id="address" maxlength="300"></textarea>
+<div class="actions"><button class="primary" type="submit">Отправить заявку</button></div></form>
+<p id="registrationStatus" class="status" hidden></p></section>
 
-<section id="register" class="card">
-<h2 id="regTitle">Заявка на подключение школы</h2>
-<p class="muted" id="regHint">Заполните форму. Заявка будет ожидать ручного подтверждения.</p>
-<form id="schoolForm">
-<label id="nameLabel">Название школы *</label><input name="name" required placeholder="Средняя школа №15">
-<label id="typeLabel">Тип учреждения</label><select name="type"><option>Средняя общеобразовательная школа</option><option>Гимназия</option><option>Лицей</option><option>Начальная школа</option></select>
-<label id="regionLabel">Регион / город *</label><select name="region" required><option value="">Выберите регион</option><option>Душанбе</option><option>Согдийская область</option><option>Хатлонская область</option><option>ГБАО</option><option>Районы республиканского подчинения</option></select>
-<label id="districtLabel">Район / город *</label><input name="district" required placeholder="Пянджский район">
-<label id="addressLabel">Адрес школы</label><input name="address" placeholder="Населённый пункт, улица">
-<label id="directorLabel">ФИО директора *</label><input name="director" required>
-<label id="phoneLabel">Телефон для связи</label><input name="phone" type="tel" placeholder="+992">
-<p class="muted" id="privacyNote">Не вводите реальные персональные данные учеников. Это стартовая версия без сервера.</p>
-<button class="primary" type="submit" id="sendBtn">Отправить заявку</button>
-</form><p id="feedback" role="status" class="muted"></p>
-</section>
-<section id="admin" class="card" hidden>
-<h2 id="adminTitle">Панель главного администратора</h2>
-<p class="muted" id="adminHint">Заявки школ из общей базы данных.</p>
-<div class="grid"><div class="stat"><b id="pendingCount">0</b><div class="muted" id="pendingLabel">Ожидают проверки</div></div><div class="stat"><b id="approvedCount">0</b><div class="muted" id="approvedLabel">Подтверждены</div></div></div>
-<h3 id="pendingTitle">Новые заявки</h3><div id="pendingList" class="muted">Заявок пока нет.</div>
-<h3 id="approvedTitle">Подтверждённые школы</h3><div id="approvedList" class="muted">Школ пока нет.</div>
-</section>
-  <section id="director" class="card" hidden>
-  <h2>Кабинет директора</h2>
-  <p class="muted">Добро пожаловать в School Alliance!</p>
+<section class="page panel" id="page-about" hidden><h2>О School Alliance</h2>
+<p>School Alliance — единая платформа для школ Таджикистана. Подключение школ выполняется после ручной проверки заявки.</p>
+<ul><li>Роли и отдельные кабинеты.</li><li>Следующие модули: учителя, ученики, оценки, расписание, посещаемость и библиотека.</li></ul>
+<p class="muted">Это ранняя рабочая версия. Вход и хранение заявок используют Firebase. Полные учебные модули ещё не реализованы.</p></section>
 
-  <h3>Моя школа</h3>
-  <div id="directorSchool">Загрузка данных школы...</div>
+<section class="page panel" id="page-login" hidden><h2>Вход в систему</h2>
+<form id="loginForm"><label for="email">Электронная почта</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required>
+<div class="actions"><button class="primary" type="submit">Войти</button><button type="button" id="logoutButton" hidden>Выйти</button></div></form>
+<p id="authStatus" class="status">Подключение к Firebase…</p></section>
 
-  <h3>Управление школой</h3>
-  <p>Здесь будут учителя, ученики, классы и расписание.</p>
-  </section>
-<section id="about" class="card" hidden>
-<h2>О School Alliance</h2>
-<p>Цель проекта — единая платформа для школ Таджикистана. Каждая школа должна иметь отдельные учётные записи, роли и защищённые данные.</p>
-<ul><li>Регистрация школ с ручной проверкой</li><li>Кабинеты директора, учителя, ученика и родителя</li><li>Оценки, расписание, посещаемость и библиотека</li><li>Русский и таджикский языки</li></ul>
-<p class="muted">Важно: сейчас это только локальный прототип. Данные хранятся в браузере на этом устройстве. Другие школы пока не могут видеть или отправлять заявки в общую систему.</p>
-</section>
-<footer>School Alliance · Начальный прототип · Неофициальная демонстрация</footer>
-</main>
-<script>
-const $=id=>document.getElementById(id);
-let lang='ru', requests=[];
-try{requests=JSON.parse(localStorage.getItem('sa_requests')||'[]')}catch(e){requests=[]}
-const copy={
-ru:{tag:'Школы объединяются в одной системе',reg:'Заявка на подключение школы',hint:'Заполните форму. Заявка будет ожидать ручного подтверждения.',name:'Название школы *',type:'Тип учреждения',region:'Регион / город *',district:'Район / город *',address:'Адрес школы',director:'ФИО директора *',phone:'Телефон для связи',privacy:'Не вводите реальные персональные данные учеников. Это стартовая версия без сервера.',send:'Отправить заявку',admin:'Панель главного администратора',adminHint:'Заявки школ из общей базы данных.',pending:'Ожидают проверки',approved:'Подтверждены',new:'Новые заявки',schools:'Подтверждённые школы',none:'Заявок пока нет.',success:'Заявка сохранена на этом устройстве. Для общей регистрации понадобится подключить сервер.',approve:'Подтвердить',reject:'Отклонить',rejected:'Отклонена',approvedStatus:'Подтверждена'},
-tj:{tag:'Мактабҳо дар як низом муттаҳид мешаванд',reg:'Ариза барои пайваст кардани мактаб',hint:'Шаклро пур кунед. Ариза барои тасдиқи дастӣ фиристода мешавад.',name:'Номи мактаб *',type:'Навъи муассиса',region:'Вилоят / шаҳр *',district:'Ноҳия / шаҳр *',address:'Суроғаи мактаб',director:'Ному насаби директор *',phone:'Телефон барои тамос',privacy:'Маълумоти шахсии хонандагонро ворид накунед. Ин версия ҳоло сервер надорад.',send:'Фиристодани ариза',admin:'Панели маъмури асосӣ',adminHint:'Рӯйхати дархостҳои мактабҳо аз пойгоҳи умумӣ.',pending:'Дар интизори санҷиш',approved:'Тасдиқшуда',new:'Аризаҳои нав',schools:'Мактабҳои тасдиқшуда',none:'Ҳоло ариза нест.',success:'Ариза дар ҳамин дастгоҳ нигоҳ дошта шуд. Барои бақайдгирии умумӣ сервер лозим аст.',approve:'Тасдиқ кардан',reject:'Рад кардан',rejected:'Рад шуд',approvedStatus:'Тасдиқ шуд'}
-};
-function translate(){
-let t=copy[lang];$('tagline').textContent=t.tag;$('regTitle').textContent=t.reg;$('regHint').textContent=t.hint;
-['name','type','region','district','address','director','phone'].forEach(k=>$(k+'Label').textContent=t[k]);
-$('privacyNote').textContent=t.privacy;$('sendBtn').textContent=t.send;$('adminTitle').textContent=t.admin;$('adminHint').textContent=t.adminHint;$('pendingLabel').textContent=t.pending;$('approvedLabel').textContent=t.approved;$('pendingTitle').textContent=t.new;$('approvedTitle').textContent=t.schools;
-$('langBtn').textContent=lang==='ru'?'Тоҷикӣ':'Русский';renderAdmin();
-}
-function save(){localStorage.setItem('sa_requests',JSON.stringify(requests))}
-function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function loadRequests(){
-  try {
-    const snapshot = await getDocs(collection(db, 'schoolRequests'));
+<section class="page panel" id="page-admin" hidden><h2>Панель главного администратора</h2>
+<div class="stats"><div class="stat"><strong id="pendingCount">—</strong>Ожидают проверки</div><div class="stat"><strong id="approvedCount">—</strong>Подтверждённые школы</div></div>
+<h3>Новые заявки</h3><div id="pendingList" class="muted">Загрузка…</div>
+<h3>Подтверждённые школы</h3><div id="approvedList" class="muted">Загрузка…</div><p id="adminError" class="status" hidden></p></section>
 
-    requests = snapshot.docs.map(item => ({
-      id: item.id,
-      ...item.data()
-    }));
-
-    renderAdmin();
-
-  } catch (error) {
-    $('pendingList').textContent =
-      'Ошибка загрузки заявок: ' + (error.code || error.message);
-  }
-}
-  function renderAdmin(){
-  let t = copy[lang];
-
-  let p = requests.filter(x => x.status === 'pending');
-  let a = requests.filter(x => x.status === 'approved');
-
-  $('pendingCount').textContent = p.length;
-  $('approvedCount').textContent = a.length;
-
-  $('pendingList').innerHTML = p.length
-    ? p.map(x => `
-      <div class="item">
-        <b>${esc(x.name)}</b>
-        <div class="muted">
-          ${esc(x.region)} · ${esc(x.district)}<br>
-          ${esc(x.director)} · ${esc(x.phone)}
-        </div>
-        <div class="row" style="justify-content:flex-start;margin-top:8px">
-          <button class="primary smallbtn" data-approve="${esc(x.id)}">${t.approve}</button>
-          <button class="tab smallbtn" data-reject="${esc(x.id)}">${t.reject}</button>
-        </div>
-      </div>
-    `).join('')
-    : t.none;
-
-  $('approvedList').innerHTML = a.length
-    ? a.map(x => `
-      <div class="item">
-        🏫 <b>${esc(x.name)}</b>
-        <div class="muted">
-          ${esc(x.region)} · ${esc(x.district)}
-        </div>
-        <span class="badge">${t.approvedStatus}</span>
-      </div>
-    `).join('')
-    : t.none;
-  }
-document.querySelectorAll('[data-page]').forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll('[data-page]').forEach(x => {
-      x.classList.toggle('active', x === b);
-    });
-
-    ['register', 'admin', 'about'].forEach(id => {
-      $(id).hidden = id !== b.dataset.page;
-    });
-
-    if (b.dataset.page === 'admin') {
-      loadRequests();
-    }
-  };
-});
-
-$('tabLogin').onclick = () => {
-  document.querySelectorAll('[data-page]').forEach(x => {
-    x.classList.remove('active');
-  });
-
-  $('tabLogin').classList.add('active');
-
-  ['register', 'admin', 'about'].forEach(id => {
-    $(id).hidden = true;
-  });
-
-  $('firebaseLogin').hidden = false;
-};
-$('langBtn').onclick=()=>{lang=lang==='ru'?'tj':'ru';translate()};
-$('schoolForm').onsubmit = async e => {
-  e.preventDefault();
-
-  const f = new FormData(e.target);
-
-  const application = {
-    name: f.get('name'),
-    type: f.get('type'),
-    region: f.get('region'),
-    district: f.get('district'),
-    address: f.get('address'),
-    director: f.get('director'),
-    phone: f.get('phone'),
-    status: 'pending'
-  };
-
-  try {
-    await addDoc(collection(db, 'schoolRequests'), application);
-
-    $('feedback').textContent =
-      'Заявка успешно отправлена! Она ожидает подтверждения администратора.';
-
-    e.target.reset();
-
-  } catch (error) {
-    $('feedback').textContent =
-      'Ошибка отправки заявки: ' + (error.code || error.message);
-  }
-};
-document.addEventListener('click', async e => {
-  let a = e.target.closest('[data-approve]');
-  let r = e.target.closest('[data-reject]');
-
-  if (!a && !r) return;
-
-  let id = a ? a.dataset.approve : r.dataset.reject;
-  let newStatus = a ? 'approved' : 'rejected';
-
-  try {
-    const requestData = requests.find(x => x.id === id);
-
-if (!requestData) {
-  throw new Error('Заявка не найдена');
-}
-
-await updateDoc(doc(db, 'schoolRequests', id), {
-  status: newStatus
-});
-
-if (newStatus === 'approved') {
-  await setDoc(doc(db, 'schools', id), {
-    name: requestData.name,
-    type: requestData.type,
-    region: requestData.region,
-    district: requestData.district,
-    address: requestData.address,
-    director: requestData.director,
-    phone: requestData.phone,
-    status: 'approved',
-    requestId: id
-  });
-}
-
-await loadRequests();
-
-    $('feedback').textContent =
-      newStatus === 'approved'
-        ? 'Школа успешно подтверждена!'
-        : 'Заявка отклонена.';
-
-  } catch (error) {
-    $('feedback').textContent =
-      'Ошибка изменения заявки: ' + (error.code || error.message);
-  }
-});
-if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-translate();
-</script>
+<section class="page panel" id="page-director" hidden><h2>Кабинет директора школы</h2>
+<div id="directorSchool" class="muted">Загрузка данных школы…</div><p id="directorError" class="status" hidden></p></section>
+</main><footer>School Alliance · Tajikistan</footer>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDocFromServer, collection, getDocs, addDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,collection,getDocs,addDoc,writeBatch} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TIhA",
-  authDomain: "school-alliance.firebaseapp.com",
-  projectId: "school-alliance",
-  storageBucket: "school-alliance.firebasestorage.app",
-  messagingSenderId: "30999952290",
-  appId: "1:30999952290:web:d5280c5684a43ee4c4d0fb",
-  measurementId: "G-V58LWRHG7G"
+const firebaseConfig={apiKey:"AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TI",authDomain:"school-alliance.firebaseapp.com",projectId:"school-alliance",storageBucket:"school-alliance.firebasestorage.app",messagingSenderId:"30999952290",appId:"1:30999952290:web:d5280c5684a43ee4c4d0fb",measurementId:"G-V58LWRHG7G"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);let currentUser=null,currentRole=null,profile=null,lang="ru";
+const dict={
+ru:{sent:"Заявка отправлена. Ожидайте проверки администратором.",sendErr:"Не удалось отправить заявку: ",loginErr:"Ошибка входа: ",profile:"Для этой учётной записи не найден профиль users/UID в Firestore.",admin:"Вы вошли как главный администратор School Alliance.",director:"Вы вошли как директор школы.",role:"У этой учётной записи нет доступа к административным кабинетам.",nonePending:"Новых заявок нет.",noneApproved:"Подтверждённых школ пока нет.",approve:"Подтвердить",reject:"Отклонить",pending:"Ожидает проверки",approved:"Подтверждена",rejected:"Отклонена",working:"Выполняется…",approveAsk:"Подтвердить заявку и добавить школу?",rejectAsk:"Отклонить заявку?",doneApprove:"Заявка подтверждена, школа добавлена.",doneReject:"Заявка отклонена.",noSchool:"В профиле не указан schoolId.",directorErr:"Не удалось загрузить школу. Проверьте schoolId и правила Firestore."},
+tj:{sent:"Ариза фиристода шуд. Тасдиқи маъмурро интизор шавед.",sendErr:"Ариза фиристода нашуд: ",loginErr:"Хатои воридшавӣ: ",profile:"Профили users/UID дар Firestore ёфт нашуд.",admin:"Шумо ҳамчун маъмури асосии School Alliance ворид шудед.",director:"Шумо ҳамчун директори мактаб ворид шудед.",role:"Ин ҳисоб ба панели маъмурӣ дастрасӣ надорад.",nonePending:"Аризаи нав нест.",noneApproved:"Мактаби тасдиқшуда нест.",approve:"Тасдиқ",reject:"Рад кардан",pending:"Интизори санҷиш",approved:"Тасдиқ шуд",rejected:"Рад шуд",working:"Иҷро шуда истодааст…",approveAsk:"Аризаро тасдиқ карда, мактабро илова мекунед?",rejectAsk:"Аризаро рад мекунед?",doneApprove:"Ариза тасдиқ шуд ва мактаб илова гардид.",doneReject:"Ариза рад шуд.",noSchool:"Дар профил schoolId нест.",directorErr:"Мактаб бор нашуд. schoolId ва қоидаҳои Firestore-ро санҷед."}
 };
+const t=k=>dict[lang][k]||dict.ru[k]||k;
+function status(id,msg,hide=false){$(id).textContent=msg;$(id).hidden=hide;}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="page-"+name);document.querySelectorAll(".tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));}
+document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("click",()=>{let p=b.dataset.page;if(p==="admin"&&currentRole!=="platform_admin")return;if(p==="director"&&currentRole!=="school_director")return;showPage(p);if(p==="admin")loadAdmin();if(p==="director")loadDirector();}));
+$("languageButton").addEventListener("click",()=>{lang=lang==="ru"?"tj":"ru";$("languageButton").textContent=lang==="ru"?"Тоҷикӣ":"Русский";document.documentElement.lang=lang==="ru"?"ru":"tg";});
 
-const status = document.getElementById("firebaseAuthStatus");
-const form = document.getElementById("firebaseLoginForm");
-const logout = document.getElementById("firebaseLogout");
-const roleStatus = document.getElementById("firestoreRoleStatus");
+$("schoolForm").addEventListener("submit",async e=>{e.preventDefault();let b=$("schoolForm").querySelector('[type=submit]');b.disabled=true;status("registrationStatus",t("working"));try{
+await addDoc(collection(db,"schoolRequests"),{name:$("schoolName").value.trim(),type:$("schoolType").value,region:$("region").value,district:$("district").value.trim(),address:$("address").value.trim(),director:$("directorName").value.trim(),phone:$("phone").value.trim(),status:"pending"});
+$("schoolForm").reset();status("registrationStatus",t("sent"));
+}catch(err){status("registrationStatus",t("sendErr")+err.message);}finally{b.disabled=false;}});
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();let b=$("loginForm").querySelector('[type=submit]');b.disabled=true;try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);}catch(err){status("authStatus",t("loginErr")+err.message);}finally{b.disabled=false;}});
+$("logoutButton").addEventListener("click",async()=>{try{await signOut(auth);}catch(err){status("authStatus","Ошибка выхода: "+err.message);}});
 
-try {
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app, "(default)");
-window.db = db;
-window.getDocs = getDocs;
-window.collection = collection;
-window.addDoc = addDoc;
-window.updateDoc = updateDoc;
-window.doc = doc;
-window.setDoc = setDoc; 
-  onAuthStateChanged(auth, async user => {
-  const adminTab = document.querySelector('[data-page="admin"]');
+function card(id,d,actions=false){let s=d.status==="approved"?t("approved"):d.status==="rejected"?t("rejected"):t("pending");return `<article class="card"><p><strong>${esc(d.name)}</strong></p><p>${esc(d.type)} · ${esc(d.region)} · ${esc(d.district)}</p><p>${esc(d.director)} · ${esc(d.phone)}</p>${d.address?`<p>${esc(d.address)}</p>`:""}<p>${esc(s)}</p>${actions?`<div class="actions"><button class="primary" data-approve="${esc(id)}">${esc(t("approve"))}</button><button class="danger" data-reject="${esc(id)}">${esc(t("reject"))}</button></div>`:""}</article>`;}
+async function loadAdmin(){if(currentRole!=="platform_admin")return;try{
+const [rq,sc]=await Promise.all([getDocs(collection(db,"schoolRequests")),getDocs(collection(db,"schools"))]);
+let requests=rq.docs.map(x=>({id:x.id,...x.data()})),schools=sc.docs.map(x=>({id:x.id,...x.data()}));
+let pending=requests.filter(x=>x.status==="pending"),approved=schools.filter(x=>x.status==="approved");
+$("pendingCount").textContent=pending.length;$("approvedCount").textContent=approved.length;
+$("pendingList").innerHTML=pending.length?pending.map(x=>card(x.id,x,true)).join(""):t("nonePending");
+$("approvedList").innerHTML=approved.length?approved.map(x=>card(x.id,x)).join(""):t("noneApproved");
+document.querySelectorAll("[data-approve]").forEach(b=>b.addEventListener("click",()=>changeStatus(b.dataset.approve,"approved")));
+document.querySelectorAll("[data-reject]").forEach(b=>b.addEventListener("click",()=>changeStatus(b.dataset.reject,"rejected")));
+$("adminError").hidden=true;
+}catch(err){status("adminError","Ошибка загрузки заявок: "+err.message);}}
+async function changeStatus(id,newStatus){if(currentRole!=="platform_admin"||!currentUser)return;if(!confirm(newStatus==="approved"?t("approveAsk"):t("rejectAsk")))return;
+try{let ref=doc(db,"schoolRequests",id),snap=await getDoc(ref);if(!snap.exists())throw Error("Заявка не найдена");let d=snap.data(),batch=writeBatch(db);batch.update(ref,{status:newStatus});
+if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.type,region:d.region,district:d.district,address:d.address,director:d.director,phone:d.phone,status:"approved",requestId:id});
+await batch.commit();await loadAdmin();status("adminError",newStatus==="approved"?t("doneApprove"):t("doneReject"));}catch(err){status("adminError","Не удалось обработать заявку: "+err.message);}}
+async function loadDirector(){if(currentRole!=="school_director"||!profile)return;let id=profile.schoolId;if(!id){$("directorSchool").textContent=t("noSchool");return;}
+try{let s=await getDoc(doc(db,"schools",id));if(!s.exists())throw Error(t("directorErr"));$("directorSchool").innerHTML=card(id,s.data());$("directorError").hidden=true;}catch(err){status("directorError",t("directorErr")+" "+err.message);}}
 
-  if (user) {
-    status.textContent =
-      "Вы вошли как: " + user.email +
-      "\nUID: " + user.uid;
-
-    form.hidden = true;
-    logout.hidden = false;
-
-    if (adminTab) adminTab.hidden = true;
-
-    roleStatus.textContent = "Проверяем роль пользователя...";
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDocFromServer(userRef);
-
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        const role = userData.role;
-
-        roleStatus.textContent =
-          "Профиль найден! Роль: " + String(role || "не указана");
-
-        if (adminTab) {
-          adminTab.hidden = role !== "platform_admin";
-        }
-
-        if (role === "platform_admin") {
-          roleStatus.textContent =
-            "Вы вошли как главный администратор School Alliance!";
-        }
-
-      } else {
-        roleStatus.textContent = "Профиль пользователя не найден.";
-        if (adminTab) adminTab.hidden = true;
-      }
-
-    } catch (error) {
-      roleStatus.textContent =
-        "Ошибка проверки роли: " + (error.code || error.message);
-
-      if (adminTab) adminTab.hidden = true;
-    }
-
-  } else {
-    status.textContent =
-      "Вы не вошли. Используйте тестовую учётную запись.";
-
-    form.hidden = false;
-    logout.hidden = true;
-
-    roleStatus.textContent = "Войдите, чтобы проверить запись роли.";
-
-    if (adminTab) adminTab.hidden = true;
-  }
-});
-
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
-    status.textContent = "Выполняется вход…";
-    try {
-      await signInWithEmailAndPassword(
-        auth,
-        document.getElementById("firebaseEmail").value.trim(),
-        document.getElementById("firebasePassword").value
-      );
-    } catch (error) {
-      status.textContent = "Ошибка входа: " + (error.code || error.message);
-    }
-  });
-
-  logout.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      status.textContent = "Ошибка выхода: " + (error.code || error.message);
-    }
-  });
-} catch (error) {
-  status.textContent = "Не удалось подключить Firebase: " + (error.message || error);
-}
-</script>
-
-</body></html>
+onAuthStateChanged(auth,async user=>{currentUser=user;currentRole=null;profile=null;$("tabAdmin").hidden=true;$("tabDirector").hidden=true;$("logoutButton").hidden=!user;
+if(!user){$("authStatus").textContent="Подключение к Firebase…";showPage("login");return;}
+$("authStatus").textContent="Проверяем профиль пользователя…";
+try{let p=await getDoc(doc(db,"users",user.uid));if(!p.exists()){status("authStatus",t("profile"));showPage("login");return;}profile=p.data();currentRole=profile.role;
+if(currentRole==="platform_admin"){$("tabAdmin").hidden=false;status("authStatus",t("admin"));showPage("admin");await loadAdmin();}
+else if(currentRole==="school_director"){$("tabDirector").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
+else{status("authStatus",t("role"));showPage("login");}
+}catch(err){status("authStatus","Не удалось проверить профиль: "+err.message);showPage("login");}});
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
+</script></body></html>

@@ -1,9 +1,22 @@
 {
   "name": "School Alliance",
   "short_name": "School Alliance",
-  "start_url": "./index.html",
+  "description": "Единая образовательная платформа для школ Таджикистана",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f2f5fa",
-  "theme_color": "#102748",
-  "description": "Платформа школьного управления"
+  "background_color": "#f3f6fb",
+  "theme_color": "#153b67",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
