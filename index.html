@@ -99,6 +99,27 @@ footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-wi
   <div id="teachersList">Загрузка учителей…</div>
   <p id="teachersError" class="status" hidden></p>
 </section>
+  <section class="page panel" id="page-students" hidden>
+  <h2>Ученики школы</h2>
+  <p class="muted">Добавление и управление учениками вашей школы.</p>
+
+  <form id="studentForm">
+    <label>ФИО ученика</label>
+    <input id="studentName" type="text" required placeholder="Введите ФИО">
+
+    <label>Класс</label>
+    <input id="studentClass" type="text" required placeholder="Например: 7-А">
+
+    <label>Телефон родителя</label>
+    <input id="studentParentPhone" type="tel" placeholder="Номер телефона">
+
+    <button class="primary" type="submit">Добавить ученика</button>
+  </form>
+
+  <h3>Список учеников</h3>
+  <div id="studentsList">Загрузка учеников…</div>
+  <p id="studentsError" class="status" hidden></p>
+  </section>
 </main><footer>School Alliance · Tajikistan</footer>
 
 <script type="module">
