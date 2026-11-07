@@ -135,28 +135,77 @@ try{let s=await getDoc(doc(db,"schools",id));if(!s.exists())throw Error(t("direc
 async function loadTeachers(){
   if(currentRole!=="school_director"||!profile)return;
 
-  let id=profile.schoolId;
+  const id=profile.schoolId;
   if(!id)return;
 
   try{
-    let snap=await getDocs(collection(db,"schools",id,"teachers"));
+    const snap=await getDocs(collection(db,"schools",id,"teachers"));
 
     $("teachersList").innerHTML=snap.empty
       ? "<p>Учителей пока нет.</p>"
       : snap.docs.map(d=>{
-          let t=d.data();
+          const t=d.data();
           return `<article class="card">
             <p><strong>${esc(t.name)}</strong></p>
             <p>Предмет: ${esc(t.subject)}</p>
             <p>Телефон: ${esc(t.phone||"Не указан")}</p>
+            <button type="button" class="primary" data-edit-teacher="${esc(d.id)}">Редактировать</button>
           </article>`;
         }).join("");
 
     $("teachersError").hidden=true;
+
   }catch(err){
     status("teachersError","Ошибка загрузки учителей: "+err.message);
   }
 }
+
+$("teachersList").onclick=async e=>{
+  const b=e.target.closest("[data-edit-teacher]");
+  if(!b)return;
+
+  const id=profile.schoolId;
+  const teacherId=b.dataset.editTeacher;
+
+  try{
+    const ref=doc(db,"schools",id,"teachers",teacherId);
+    const snap=await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("Учитель не найден.");
+      return;
+    }
+
+    const old=snap.data();
+
+    const name=prompt("ФИО учителя:",old.name);
+    if(name===null)return;
+
+    const subject=prompt("Предмет:",old.subject);
+    if(subject===null)return;
+
+    const phone=prompt("Телефон:",old.phone||"");
+    if(phone===null)return;
+
+    if(!name.trim()||!subject.trim()){
+      alert("ФИО и предмет обязательны.");
+      return;
+    }
+
+    await updateDoc(ref,{
+      name:name.trim(),
+      subject:subject.trim(),
+      phone:phone.trim()
+    });
+
+    alert("Данные учителя обновлены!");
+    await loadTeachers();
+
+  }catch(err){
+    alert("Ошибка редактирования: "+err.message);
+  }
+};
+   
 $("teacherForm").addEventListener("submit", async e => {
   e.preventDefault();
 
