@@ -103,9 +103,12 @@ document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("clic
 
   showPage(p);
 
-  if(p==="admin")loadAdmin();
-  if(p==="director")loadDirector();
-  if(p==="teachers")loadTeachers();
+  if(p==="admin"){
+  loadAdmin();
+  loadDirectors();
+}
+if(p==="director")loadDirector();
+if(p==="teachers")loadTeachers();
 }));
 $("languageButton").addEventListener("click",()=>{lang=lang==="ru"?"tj":"ru";$("languageButton").textContent=lang==="ru"?"Тоҷикӣ":"Русский";document.documentElement.lang=lang==="ru"?"ru":"tg";});
 
