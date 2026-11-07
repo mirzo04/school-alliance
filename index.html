@@ -22,6 +22,7 @@ footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-wi
 <button class="tab" data-page="login">Вход</button>
 <button class="tab" data-page="admin" id="tabAdmin" hidden>Администратор</button>
 <button class="tab" data-page="director" id="tabDirector" hidden>Кабинет директора</button>
+<button class="tab" data-page="teachers" id="tabTeachers" hidden>Учителя</button>
 <button id="languageButton">Тоҷикӣ</button></nav>
 
 <section class="page panel" id="page-register"><h2>Заявка на подключение школы</h2>
@@ -54,7 +55,27 @@ footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-wi
 <h3>Подтверждённые школы</h3><div id="approvedList" class="muted">Загрузка…</div><p id="adminError" class="status" hidden></p></section>
 
 <section class="page panel" id="page-director" hidden><h2>Кабинет директора школы</h2>
-<div id="directorSchool" class="muted">Загрузка данных школы…</div><p id="directorError" class="status" hidden></p></section>
+<div id="directorSchool" class="muted">Загрузка данных школы…</div><p id="directorError" class="status" hidden></p></section> <section class="page panel" id="page-teachers" hidden>
+  <h2>Учителя школы</h2>
+  <p class="muted">Добавление и управление учителями вашей школы.</p>
+
+  <form id="teacherForm">
+    <label>ФИО учителя</label>
+    <input id="teacherName" type="text" required placeholder="Введите ФИО">
+
+    <label>Предмет</label>
+    <input id="teacherSubject" type="text" required placeholder="Например: Математика">
+
+    <label>Телефон</label>
+    <input id="teacherPhone" type="tel" placeholder="Номер телефона">
+
+    <button class="primary" type="submit">Добавить учителя</button>
+  </form>
+
+  <h3>Список учителей</h3>
+  <div id="teachersList">Загрузка учителей…</div>
+  <p id="teachersError" class="status" hidden></p>
+</section>
 </main><footer>School Alliance · Tajikistan</footer>
 
 <script type="module">
@@ -73,7 +94,17 @@ const t=k=>dict[lang][k]||dict.ru[k]||k;
 function status(id,msg,hide=false){$(id).textContent=msg;$(id).hidden=hide;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="page-"+name);document.querySelectorAll(".tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));}
-document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("click",()=>{let p=b.dataset.page;if(p==="admin"&&currentRole!=="platform_admin")return;if(p==="director"&&currentRole!=="school_director")return;showPage(p);if(p==="admin")loadAdmin();if(p==="director")loadDirector();}));
+document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("click",()=>{
+  let p=b.dataset.page;
+  if(p==="admin"&&currentRole!=="platform_admin")return;
+  if((p==="director"||p==="teachers")&&currentRole!=="school_director")return;
+
+  showPage(p);
+
+  if(p==="admin")loadAdmin();
+  if(p==="director")loadDirector();
+  if(p==="teachers")loadTeachers();
+}));
 $("languageButton").addEventListener("click",()=>{lang=lang==="ru"?"tj":"ru";$("languageButton").textContent=lang==="ru"?"Тоҷикӣ":"Русский";document.documentElement.lang=lang==="ru"?"ru":"tg";});
 
 $("schoolForm").addEventListener("submit",async e=>{e.preventDefault();let b=$("schoolForm").querySelector('[type=submit]');b.disabled=true;status("registrationStatus",t("working"));try{
@@ -101,13 +132,63 @@ if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.typ
 await batch.commit();await loadAdmin();status("adminError",newStatus==="approved"?t("doneApprove"):t("doneReject"));}catch(err){status("adminError","Не удалось обработать заявку: "+err.message);}}
 async function loadDirector(){if(currentRole!=="school_director"||!profile)return;let id=profile.schoolId;if(!id){$("directorSchool").textContent=t("noSchool");return;}
 try{let s=await getDoc(doc(db,"schools",id));if(!s.exists())throw Error(t("directorErr"));$("directorSchool").innerHTML=card(id,s.data());$("directorError").hidden=true;}catch(err){status("directorError",t("directorErr")+" "+err.message);}}
+async function loadTeachers(){
+  if(currentRole!=="school_director"||!profile)return;
 
+  let id=profile.schoolId;
+  if(!id)return;
+
+  try{
+    let snap=await getDocs(collection(db,"schools",id,"teachers"));
+
+    $("teachersList").innerHTML=snap.empty
+      ? "<p>Учителей пока нет.</p>"
+      : snap.docs.map(d=>{
+          let t=d.data();
+          return `<article class="card">
+            <p><strong>${esc(t.name)}</strong></p>
+            <p>Предмет: ${esc(t.subject)}</p>
+            <p>Телефон: ${esc(t.phone||"Не указан")}</p>
+          </article>`;
+        }).join("");
+
+    $("teachersError").hidden=true;
+  }catch(err){
+    status("teachersError","Ошибка загрузки учителей: "+err.message);
+  }
+}
+$("teacherForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if(currentRole!=="school_director"||!profile||!profile.schoolId)return;
+
+  const id=profile.schoolId;
+  const name=$("teacherName").value.trim();
+  const subject=$("teacherSubject").value.trim();
+  const phone=$("teacherPhone").value.trim();
+
+  if(!name||!subject)return;
+
+  try{
+    await addDoc(collection(db,"schools",id,"teachers"),{
+      name:name,
+      subject:subject,
+      phone:phone,
+      createdAt:new Date().toISOString()
+    });
+
+    $("teacherForm").reset();
+    await loadTeachers();
+  }catch(err){
+    status("teachersError","Не удалось добавить учителя: "+err.message);
+  }
+});
 onAuthStateChanged(auth,async user=>{currentUser=user;currentRole=null;profile=null;$("tabAdmin").hidden=true;$("tabDirector").hidden=true;$("logoutButton").hidden=!user;
 if(!user){$("authStatus").textContent="Подключение к Firebase…";showPage("login");return;}
 $("authStatus").textContent="Проверяем профиль пользователя…";
 try{let p=await getDoc(doc(db,"users",user.uid));if(!p.exists()){status("authStatus",t("profile"));showPage("login");return;}profile=p.data();currentRole=profile.role;
 if(currentRole==="platform_admin"){$("tabAdmin").hidden=false;status("authStatus",t("admin"));showPage("admin");await loadAdmin();}
-else if(currentRole==="school_director"){$("tabDirector").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
+else if(currentRole==="school_director"){$("tabDirector").hidden=false;$("tabTeachers").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
 else{status("authStatus",t("role"));showPage("login");}
 }catch(err){status("authStatus","Не удалось проверить профиль: "+err.message);showPage("login");}});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
