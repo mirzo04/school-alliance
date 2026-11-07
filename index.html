@@ -160,6 +160,46 @@ $("adminError").hidden=true;
     status("directorsError","Ошибка загрузки директоров: "+err.message);
   }
   }
+  $("directorsList").onclick=async e=>{
+  const b=e.target.closest("[data-edit-director]");
+  if(!b)return;
+
+  const schoolId=b.dataset.editDirector;
+
+  try{
+    const ref=doc(db,"schools",schoolId);
+    const snap=await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("Школа не найдена.");
+      return;
+    }
+
+    const old=snap.data();
+
+    const director=prompt("ФИО директора:",old.director||"");
+    if(director===null)return;
+
+    const phone=prompt("Телефон директора:",old.phone||"");
+    if(phone===null)return;
+
+    if(!director.trim()){
+      alert("ФИО директора обязательно.");
+      return;
+    }
+
+    await updateDoc(ref,{
+      director:director.trim(),
+      phone:phone.trim()
+    });
+
+    alert("Данные директора обновлены!");
+    await loadDirectors();
+
+  }catch(err){
+    alert("Ошибка редактирования: "+err.message);
+  }
+};
 async function changeStatus(id,newStatus){if(currentRole!=="platform_admin"||!currentUser)return;if(!confirm(newStatus==="approved"?t("approveAsk"):t("rejectAsk")))return;
 try{let ref=doc(db,"schoolRequests",id),snap=await getDoc(ref);if(!snap.exists())throw Error("Заявка не найдена");let d=snap.data(),batch=writeBatch(db);batch.update(ref,{status:newStatus});
 if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.type,region:d.region,district:d.district,address:d.address,director:d.director,phone:d.phone,status:"approved",requestId:id});
