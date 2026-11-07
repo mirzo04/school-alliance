@@ -141,7 +141,7 @@ function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p
 document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("click",()=>{
   let p=b.dataset.page;
   if(p==="admin"&&currentRole!=="platform_admin")return;
-  if((p==="director"||p==="teachers")&&currentRole!=="school_director")return;
+  if((p==="director"||p==="teachers"||p==="students")&&currentRole!=="school_director")return;
 
   showPage(p);
 
