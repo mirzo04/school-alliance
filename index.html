@@ -327,7 +327,12 @@ filter.value=classes.includes(selectedClass)
   : "";
     $("studentsList").innerHTML=snap.empty
       ? "<p>Учеников пока нет.</p>"
-      : snap.docs.map(d=>{
+      : snap.docs
+    .filter(d=>{
+      const selected=$("studentsClassFilter").value;
+      return !selected || d.data().className===selected;
+    })
+    .map(d=>{
           const s=d.data();
 
           return `<article class="card">
