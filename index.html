@@ -253,6 +253,7 @@ if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.typ
 await batch.commit();await loadAdmin();status("adminError",newStatus==="approved"?t("doneApprove"):t("doneReject"));}catch(err){status("adminError","Не удалось обработать заявку: "+err.message);}}
 async function loadDirector(){if(currentRole!=="school_director"||!profile)return;let id=profile.schoolId;if(!id){$("directorSchool").textContent=t("noSchool");return;}
 try{let s=await getDoc(doc(db,"schools",id));if(!s.exists())throw Error(t("directorErr"));$("directorSchool").innerHTML=card(id,s.data());$("directorError").hidden=true;}catch(err){status("directorError",t("directorErr")+" "+err.message);}}
+
 async function loadTeachers(){
   if(currentRole!=="school_director"||!profile)return;
 
@@ -266,11 +267,21 @@ async function loadTeachers(){
       ? "<p>Учителей пока нет.</p>"
       : snap.docs.map(d=>{
           const t=d.data();
+          const classes=Array.isArray(t.classTeacherOf)
+            ? t.classTeacherOf
+            : [];
+
           return `<article class="card">
             <p><strong>${esc(t.name)}</strong></p>
             <p>Предмет: ${esc(t.subject)}</p>
             <p>Телефон: ${esc(t.phone||"Не указан")}</p>
-            <button type="button" class="primary" data-edit-teacher="${esc(d.id)}">Редактировать</button>
+            <p>Классный руководитель: ${classes.length
+              ? classes.map(c=>esc(c)).join(", ")
+              : "Не назначен"}</p>
+            <button type="button" class="primary"
+              data-edit-teacher="${esc(d.id)}">
+              Редактировать
+            </button>
           </article>`;
         }).join("");
 
@@ -308,15 +319,36 @@ $("teachersList").onclick=async e=>{
     const phone=prompt("Телефон:",old.phone||"");
     if(phone===null)return;
 
+    const oldClasses=Array.isArray(old.classTeacherOf)
+      ? old.classTeacherOf.join(", ")
+      : "";
+
+    const classesText=prompt(
+      "Классы, в которых учитель классный руководитель (через запятую):",
+      oldClasses
+    );
+    if(classesText===null)return;
+
     if(!name.trim()||!subject.trim()){
       alert("ФИО и предмет обязательны.");
+      return;
+    }
+
+    const classTeacherOf=[...new Set(
+      classesText.split(",").map(c=>c.trim()).filter(Boolean)
+    )];
+
+    if(classTeacherOf.length>20){
+      alert("Можно назначить не более 20 классов.");
       return;
     }
 
     await updateDoc(ref,{
       name:name.trim(),
       subject:subject.trim(),
-      phone:phone.trim()
+      phone:phone.trim(),
+      classTeacherOf:classTeacherOf,
+      createdAt:old.createdAt||new Date().toISOString()
     });
 
     alert("Данные учителя обновлены!");
@@ -326,8 +358,8 @@ $("teachersList").onclick=async e=>{
     alert("Ошибка редактирования: "+err.message);
   }
 };
-   
-$("teacherForm").addEventListener("submit", async e => {
+
+$("teacherForm").addEventListener("submit", async e=>{
   e.preventDefault();
 
   if(currentRole!=="school_director"||!profile||!profile.schoolId)return;
@@ -336,23 +368,36 @@ $("teacherForm").addEventListener("submit", async e => {
   const name=$("teacherName").value.trim();
   const subject=$("teacherSubject").value.trim();
   const phone=$("teacherPhone").value.trim();
+  const classesText=$("teacherClasses").value;
 
   if(!name||!subject)return;
+
+  const classTeacherOf=[...new Set(
+    classesText.split(",").map(c=>c.trim()).filter(Boolean)
+  )];
+
+  if(classTeacherOf.length>20){
+    alert("Можно назначить не более 20 классов.");
+    return;
+  }
 
   try{
     await addDoc(collection(db,"schools",id,"teachers"),{
       name:name,
       subject:subject,
       phone:phone,
+      classTeacherOf:classTeacherOf,
       createdAt:new Date().toISOString()
     });
 
     $("teacherForm").reset();
     await loadTeachers();
+
   }catch(err){
     status("teachersError","Не удалось добавить учителя: "+err.message);
   }
 });
+  
 onAuthStateChanged(auth,async user=>{currentUser=user;currentRole=null;profile=null;$("tabAdmin").hidden=true;$("tabDirector").hidden=true;$("logoutButton").hidden=!user;
 if(!user){$("authStatus").textContent="Подключение к Firebase…";showPage("login");return;}
 $("authStatus").textContent="Проверяем профиль пользователя…";
