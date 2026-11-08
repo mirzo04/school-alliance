@@ -307,7 +307,24 @@ async function loadStudents(){
     const snap=await getDocs(
       collection(db,"schools",schoolId,"students")
     );
+const filter=$("studentsClassFilter");
+const selectedClass=filter.value;
 
+const classes=[...new Set(
+  snap.docs
+    .map(d=>d.data().className)
+    .filter(Boolean)
+)].sort();
+
+filter.innerHTML=
+  '<option value="">Все классы</option>'+
+  classes.map(c=>
+    `<option value="${esc(c)}">${esc(c)}</option>`
+  ).join("");
+
+filter.value=classes.includes(selectedClass)
+  ? selectedClass
+  : "";
     $("studentsList").innerHTML=snap.empty
       ? "<p>Учеников пока нет.</p>"
       : snap.docs.map(d=>{
