@@ -311,6 +311,10 @@ async function loadStudents(){
             <p><strong>${esc(s.name)}</strong></p>
             <p>Класс: ${esc(s.className)}</p>
             <p>Телефон родителя: ${esc(s.parentPhone||"Не указан")}</p>
+            <button type="button" class="primary"
+              data-edit-student="${esc(d.id)}">
+              Редактировать
+            </button>
           </article>`;
         }).join("");
 
@@ -320,6 +324,56 @@ async function loadStudents(){
     status("studentsError","Ошибка загрузки учеников: "+err.message);
   }
 }
+
+$("studentsList").onclick=async e=>{
+  const b=e.target.closest("[data-edit-student]");
+  if(!b)return;
+
+  const schoolId=profile.schoolId;
+  const studentId=b.dataset.editStudent;
+
+  try{
+    const ref=doc(db,"schools",schoolId,"students",studentId);
+    const snap=await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("Ученик не найден.");
+      return;
+    }
+
+    const old=snap.data();
+
+    const name=prompt("ФИО ученика:",old.name);
+    if(name===null)return;
+
+    const className=prompt("Класс:",old.className);
+    if(className===null)return;
+
+    const parentPhone=prompt(
+      "Телефон родителя:",
+      old.parentPhone||""
+    );
+    if(parentPhone===null)return;
+
+    if(!name.trim()||!className.trim()){
+      alert("ФИО и класс обязательны.");
+      return;
+    }
+
+    await updateDoc(ref,{
+      name:name.trim(),
+      className:className.trim(),
+      parentPhone:parentPhone.trim(),
+      createdAt:old.createdAt
+    });
+
+    alert("Данные ученика обновлены!");
+    await loadStudents();
+
+  }catch(err){
+    alert("Ошибка редактирования: "+err.message);
+  }
+};
 $("teachersList").onclick=async e=>{
   const b=e.target.closest("[data-edit-teacher]");
   if(!b)return;
