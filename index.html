@@ -291,7 +291,35 @@ async function loadTeachers(){
     status("teachersError","Ошибка загрузки учителей: "+err.message);
   }
 }
+async function loadStudents(){
+  if(currentRole!=="school_director"||!profile)return;
 
+  const schoolId=profile.schoolId;
+  if(!schoolId)return;
+
+  try{
+    const snap=await getDocs(
+      collection(db,"schools",schoolId,"students")
+    );
+
+    $("studentsList").innerHTML=snap.empty
+      ? "<p>Учеников пока нет.</p>"
+      : snap.docs.map(d=>{
+          const s=d.data();
+
+          return `<article class="card">
+            <p><strong>${esc(s.name)}</strong></p>
+            <p>Класс: ${esc(s.className)}</p>
+            <p>Телефон родителя: ${esc(s.parentPhone||"Не указан")}</p>
+          </article>`;
+        }).join("");
+
+    $("studentsError").hidden=true;
+
+  }catch(err){
+    status("studentsError","Ошибка загрузки учеников: "+err.message);
+  }
+}
 $("teachersList").onclick=async e=>{
   const b=e.target.closest("[data-edit-teacher]");
   if(!b)return;
@@ -397,7 +425,35 @@ $("teacherForm").addEventListener("submit", async e=>{
     status("teachersError","Не удалось добавить учителя: "+err.message);
   }
 });
-  
+$("studentForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+
+  if(currentRole!=="school_director"||!profile||!profile.schoolId)return;
+
+  const schoolId=profile.schoolId;
+  const name=$("studentName").value.trim();
+  const className=$("studentClass").value.trim();
+  const parentPhone=$("studentParentPhone").value.trim();
+
+  if(!name||!className)return;
+
+  try{
+    await addDoc(collection(db,"schools",schoolId,"students"),{
+      name:name,
+      className:className,
+      parentPhone:parentPhone,
+      createdAt:new Date().toISOString()
+    });
+
+    $("studentForm").reset();
+    await loadStudents();
+
+    alert("Ученик успешно добавлен!");
+
+  }catch(err){
+    status("studentsError","Не удалось добавить ученика: "+err.message);
+  }
+});
 onAuthStateChanged(auth,async user=>{currentUser=user;currentRole=null;profile=null;$("tabAdmin").hidden=true;$("tabDirector").hidden=true;$("logoutButton").hidden=!user;
 if(!user){$("authStatus").textContent="Подключение к Firebase…";showPage("login");return;}
 $("authStatus").textContent="Проверяем профиль пользователя…";
