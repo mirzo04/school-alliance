@@ -403,7 +403,7 @@ if(!user){$("authStatus").textContent="Подключение к Firebase…";sh
 $("authStatus").textContent="Проверяем профиль пользователя…";
 try{let p=await getDoc(doc(db,"users",user.uid));if(!p.exists()){status("authStatus",t("profile"));showPage("login");return;}profile=p.data();currentRole=profile.role;
 if(currentRole==="platform_admin"){$("tabAdmin").hidden=false;status("authStatus",t("admin"));showPage("admin");await loadAdmin();}
-else if(currentRole==="school_director"){$("tabDirector").hidden=false;$("tabTeachers").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
+else if(currentRole==="school_director"){$("tabDirector").hidden=false;$("tabTeachers").hidden=false;$("tabStudents").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
 else{status("authStatus",t("role"));showPage("login");}
 }catch(err){status("authStatus","Не удалось проверить профиль: "+err.message);showPage("login");}});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
