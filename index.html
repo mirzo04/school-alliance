@@ -183,6 +183,7 @@ $("approvedList").innerHTML=approved.length?approved.map(x=>card(x.id,x)).join("
 document.querySelectorAll("[data-approve]").forEach(b=>b.addEventListener("click",()=>changeStatus(b.dataset.approve,"approved")));
 document.querySelectorAll("[data-reject]").forEach(b=>b.addEventListener("click",()=>changeStatus(b.dataset.reject,"rejected")));
 $("adminError").hidden=true;
+  await loadDirectors();
 }catch(err){status("adminError","Ошибка загрузки заявок: "+err.message);}}
   async function loadDirectors(){
   if(currentRole!=="platform_admin")return;
