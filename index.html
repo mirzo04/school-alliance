@@ -449,9 +449,8 @@ $("teachersList").onclick=async e=>{
       return;
     }
 
-    const classTeacherOf=[...new Set(
-      classesText.split(",").map(c=>c.trim()).filter(Boolean)
-    )];
+    const teachingClasses=[...new Set(teachingClassesText.split(",").map(c=>c.trim()).filter(Boolean))];
+const classTeacherOf=[...new Set(classesText.split(",").map(c=>c.trim()).filter(Boolean))];
 
     if(classTeacherOf.length>20){
       alert("Можно назначить не более 20 классов.");
