@@ -483,7 +483,8 @@ $("teacherForm").addEventListener("submit", async e=>{
   const name=$("teacherName").value.trim();
   const subject=$("teacherSubject").value.trim();
   const phone=$("teacherPhone").value.trim();
-  const classesText=$("teacherClasses").value;
+  const teachingClassesText=$("teacherTeachingClasses").value;
+const classesText=$("teacherClasses").value;
 
   if(!name||!subject)return;
 
