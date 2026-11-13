@@ -543,14 +543,16 @@ const classesText=$("teacherClasses").value;
   }
 
   try{
-    await addDoc(collection(db,"schools",id,"teachers"),{
+    
+await addDoc(collection(db,"schools",id,"teachers"),{
   name:name,
   subject:subject,
   phone:phone,
-  teachingClasses:teachingClasses,
+  teachingClasses:teachingClassesText.trim(),
   classTeacherOf:classTeacherOf,
   createdAt:new Date().toISOString()
 });
+    
 
     $("teacherForm").reset();
     await loadTeachers();
