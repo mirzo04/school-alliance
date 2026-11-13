@@ -331,7 +331,8 @@ async function loadTeachers(){
           return `<article class="card">
             <p><strong>${esc(t.name)}</strong></p>
             <p>Предмет: ${esc(t.subject)}</p>
-            <p>Телефон: ${esc(t.phone||"Не указан")}</p>
+<p>Преподаёт в классах: ${esc(t.teachingClasses||"Не указаны")}</p>
+<p>Телефон: ${esc(t.phone||"Не указан")}</p>
             <p>Классный руководитель: ${classes.length
               ? classes.map(c=>esc(c)).join(", ")
               : "Не назначен"}</p>
