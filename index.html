@@ -477,12 +477,21 @@ $("teachersList").onclick=async e=>{
     const subject=prompt("Предмет:",old.subject);
     if(subject===null)return;
 
-    const phone=prompt("Телефон:",old.phone||"");
-    if(phone===null)return;
+    
+const phone=prompt("Телефон:",old.phone||"");
+if(phone===null)return;
 
-    const oldClasses=Array.isArray(old.classTeacherOf)
-      ? old.classTeacherOf.join(", ")
-      : "";
+const oldTeachingClasses=old.teachingClasses||"";
+const teachingClassesText=prompt(
+  "Предметные классы (через запятую):",
+  oldTeachingClasses
+);
+if(teachingClassesText===null)return;
+
+const oldClasses=Array.isArray(old.classTeacherOf)
+  ? old.classTeacherOf.join(", ")
+  : "";
+    
 
     const classesText=prompt(
       "Классы, в которых учитель классный руководитель (через запятую):",
@@ -495,9 +504,15 @@ $("teachersList").onclick=async e=>{
       return;
     }
 
-    const teachingClasses=[...new Set(teachingClassesText.split(",").map(c=>c.trim()).filter(Boolean))];
-const classTeacherOf=[...new Set(classesText.split(",").map(c=>c.trim()).filter(Boolean))];
+    
+const teachingClasses=[...new Set(
+  teachingClassesText.split(",").map(c=>c.trim()).filter(Boolean)
+)];
 
+const classTeacherOf=[...new Set(
+  classesText.split(",").map(c=>c.trim()).filter(Boolean)
+)];
+    
     if(classTeacherOf.length>20){
       alert("Можно назначить не более 20 классов.");
       return;
