@@ -39,6 +39,46 @@ footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-wi
 <label for="address">Адрес школы</label><textarea id="address" maxlength="300"></textarea>
 <div class="actions"><button class="primary" type="submit">Отправить заявку</button></div></form>
 <p id="registrationStatus" class="status" hidden></p></section>
+  
+<section class="page panel" id="page-teacher-register" hidden>
+  <h2>Регистрация учителя</h2>
+  <p class="muted">Заполните заявку. После отправки директор вашей школы должен её подтвердить.</p>
+
+  <form id="teacherRegisterForm">
+    <label for="newTeacherName">ФИО учителя *</label>
+    <input id="newTeacherName" required maxlength="160" placeholder="Введите ФИО">
+
+    <label for="newTeacherEmail">Электронная почта *</label>
+    <input id="newTeacherEmail" type="email" required autocomplete="email">
+
+    <label for="newTeacherPassword">Пароль *</label>
+    <input id="newTeacherPassword" type="password" required minlength="6" autocomplete="new-password">
+
+    <label for="newTeacherSchool">Выберите школу *</label>
+    <select id="newTeacherSchool" required>
+      <option value="">Загрузка списка школ…</option>
+    </select>
+
+    <label for="newTeacherSubject">Предмет *</label>
+    <input id="newTeacherSubject" required placeholder="Например, Математика">
+
+    <label for="newTeacherTeachingClasses">Классы, в которых преподаёте</label>
+    <input id="newTeacherTeachingClasses" placeholder="Например: 5-А, 6-Б, 7-А">
+
+    <label for="newTeacherClassTeacher">Классы, где вы классный руководитель</label>
+    <input id="newTeacherClassTeacher" placeholder="Например: 7-А, 7-Б">
+
+    <label for="newTeacherPhone">Телефон</label>
+    <input id="newTeacherPhone" type="tel" placeholder="+992 ...">
+
+    <div class="actions">
+      <button class="primary" type="submit">Отправить заявку</button>
+    </div>
+  </form>
+
+  <p id="teacherRegistrationStatus" class="status" hidden></p>
+</section>
+  
 
 <section class="page panel" id="page-about" hidden><h2>О School Alliance</h2>
 <p>School Alliance — единая платформа для школ Таджикистана. Подключение школ выполняется после ручной проверки заявки.</p>
