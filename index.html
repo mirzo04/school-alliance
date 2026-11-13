@@ -522,7 +522,8 @@ const classTeacherOf=[...new Set(
       name:name.trim(),
       subject:subject.trim(),
       phone:phone.trim(),
-      classTeacherOf:classTeacherOf,
+teachingClasses:teachingClasses.join(", "),
+classTeacherOf:classTeacherOf,
       createdAt:old.createdAt||new Date().toISOString()
     });
 
