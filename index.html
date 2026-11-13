@@ -345,13 +345,56 @@ $("adminError").hidden=true;
     alert("Ошибка редактирования: "+err.message);
   }
 };
-async function changeStatus(id,newStatus){if(currentRole!=="platform_admin"||!currentUser)return;if(!confirm(newStatus==="approved"?t("approveAsk"):t("rejectAsk")))return;
-try{let ref=doc(db,"schoolRequests",id),snap=await getDoc(ref);if(!snap.exists())throw Error("Заявка не найдена");let d=snap.data(),batch=writeBatch(db);batch.update(ref,{status:newStatus});
-if(newStatus==="approved")batch.set(doc(db,"schools",id),{name:d.name,type:d.type,region:d.region,district:d.district,address:d.address,director:d.director,phone:d.phone,status:"approved",requestId:id});
-await batch.commit();await loadAdmin();status("adminError",newStatus==="approved"?t("doneApprove"):t("doneReject"));}catch(err){status("adminError","Не удалось обработать заявку: "+err.message);}}
-async function loadDirector(){if(currentRole!=="school_director"||!profile)return;let id=profile.schoolId;if(!id){$("directorSchool").textContent=t("noSchool");return;}
-try{let s=await getDoc(doc(db,"schools",id));if(!s.exists())throw Error(t("directorErr"));$("directorSchool").innerHTML=card(id,s.data());$("directorError").hidden=true;}catch(err){status("directorError",t("directorErr")+" "+err.message);}}
 
+async function changeStatus(id,newStatus){
+  if(currentRole!=="platform_admin"||!currentUser)return;
+
+  if(!confirm(newStatus==="approved"?t("approveAsk"):t("rejectAsk")))return;
+
+  try{
+    let ref=doc(db,"schoolRequests",id);
+    let snap=await getDoc(ref);
+
+    if(!snap.exists())throw Error("Заявка не найдена");
+
+    let d=snap.data();
+    let batch=writeBatch(db);
+
+    batch.update(ref,{status:newStatus});
+
+    if(newStatus==="approved"){
+      batch.set(doc(db,"schools",id),{
+        name:d.name,
+        type:d.type,
+        region:d.region,
+        district:d.district,
+        address:d.address,
+        director:d.director,
+        phone:d.phone,
+        status:"approved",
+        requestId:id
+      });
+
+      batch.set(doc(db,"publicSchools",id),{
+        name:d.name,
+        region:d.region,
+        district:d.district
+      });
+    }
+
+    await batch.commit();
+    await loadAdmin();
+
+    status(
+      "adminError",
+      newStatus==="approved"?t("doneApprove"):t("doneReject")
+    );
+
+  }catch(err){
+    status("adminError","Не удалось обработать заявку: "+err.message);
+  }
+}
+  
 async function loadTeachers(){
   if(currentRole!=="school_director"||!profile)return;
 
