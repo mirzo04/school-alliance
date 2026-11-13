@@ -384,6 +384,30 @@ $("adminError").hidden=true;
     alert("Ошибка редактирования: "+err.message);
   }
 };
+  
+async function loadDirector(){
+  if(currentRole!=="school_director"||!profile)return;
+
+  let id=profile.schoolId;
+
+  if(!id){
+    $("directorSchool").textContent=t("noSchool");
+    return;
+  }
+
+  try{
+    let s=await getDoc(doc(db,"schools",id));
+
+    if(!s.exists())throw Error(t("directorErr"));
+
+    $("directorSchool").innerHTML=card(id,s.data());
+    $("directorError").hidden=true;
+
+  }catch(err){
+    status("directorError",t("directorErr")+" "+err.message);
+  }
+}
+  
 
 async function changeStatus(id,newStatus){
   if(currentRole!=="platform_admin"||!currentUser)return;
