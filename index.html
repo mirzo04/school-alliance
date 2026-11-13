@@ -239,6 +239,45 @@ const t=k=>dict[lang][k]||dict.ru[k]||k;
 function status(id,msg,hide=false){$(id).textContent=msg;$(id).hidden=hide;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="page-"+name);document.querySelectorAll(".tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));}
+  
+async function loadPublicSchools(){
+  const select=$("newTeacherSchool");
+  if(!select)return;
+
+  select.innerHTML='<option value="">Загрузка школ…</option>';
+
+  try{
+    const snap=await getDocs(collection(db,"publicSchools"));
+
+    select.innerHTML='<option value="">Выберите школу</option>';
+
+    snap.forEach(d=>{
+      const s=d.data();
+      const option=document.createElement("option");
+
+      option.value=d.id;
+      option.textContent=[
+        s.name,
+        s.region,
+        s.district
+      ].filter(Boolean).join(" — ");
+
+      select.appendChild(option);
+    });
+
+    if(snap.empty){
+      select.innerHTML='<option value="">Пока нет подтверждённых школ</option>';
+    }
+
+  }catch(err){
+    select.innerHTML='<option value="">Не удалось загрузить школы</option>';
+    status("teacherRegistrationStatus","Ошибка загрузки школ: "+err.message);
+  }
+}
+
+document.querySelector('[data-page="teacher-register"]')
+  .addEventListener("click",loadPublicSchools);
+  
 document.querySelectorAll(".tab[data-page]").forEach(b=>b.addEventListener("click",()=>{
   let p=b.dataset.page;
   if(p==="admin"&&currentRole!=="platform_admin")return;
