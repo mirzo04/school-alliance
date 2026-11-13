@@ -144,10 +144,56 @@ import {getFirestore,doc,getDoc,collection,getDocs,addDoc,updateDoc,writeBatch} 
 const firebaseConfig={ apiKey : "AIzaSyAdeyckAslRrHKhTUxLWc5JfcmBB20TIhA" ,authDomain:"school-alliance.firebaseapp.com",projectId:"school-alliance",storageBucket:"school-alliance.firebasestorage.app",messagingSenderId:"30999952290",appId:"1:30999952290:web:d5280c5684a43ee4c4d0fb",measurementId:"G-V58LWRHG7G"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);let currentUser=null,currentRole=null,profile=null,lang="ru";
+
 const dict={
-ru:{sent:"Заявка отправлена. Ожидайте проверки администратором.",sendErr:"Не удалось отправить заявку: ",loginErr:"Ошибка входа: ",profile:"Для этой учётной записи не найден профиль users/UID в Firestore.",admin:"Вы вошли как главный администратор School Alliance.",director:"Вы вошли как директор школы.",role:"У этой учётной записи нет доступа к административным кабинетам.",nonePending:"Новых заявок нет.",noneApproved:"Подтверждённых школ пока нет.",approve:"Подтвердить",reject:"Отклонить",pending:"Ожидает проверки",approved:"Подтверждена",rejected:"Отклонена",working:"Выполняется…",approveAsk:"Подтвердить заявку и добавить школу?",rejectAsk:"Отклонить заявку?",doneApprove:"Заявка подтверждена, школа добавлена.",doneReject:"Заявка отклонена.",noSchool:"В профиле не указан schoolId.",directorErr:"Не удалось загрузить школу. Проверьте schoolId и правила Firestore."},
-tj:{sent:"Ариза фиристода шуд. Тасдиқи маъмурро интизор шавед.",sendErr:"Ариза фиристода нашуд: ",loginErr:"Хатои воридшавӣ: ",profile:"Профили users/UID дар Firestore ёфт нашуд.",admin:"Шумо ҳамчун маъмури асосии School Alliance ворид шудед.",director:"Шумо ҳамчун директори мактаб ворид шудед.",role:"Ин ҳисоб ба панели маъмурӣ дастрасӣ надорад.",nonePending:"Аризаи нав нест.",noneApproved:"Мактаби тасдиқшуда нест.",approve:"Тасдиқ",reject:"Рад кардан",pending:"Интизори санҷиш",approved:"Тасдиқ шуд",rejected:"Рад шуд",working:"Иҷро шуда истодааст…",approveAsk:"Аризаро тасдиқ карда, мактабро илова мекунед?",rejectAsk:"Аризаро рад мекунед?",doneApprove:"Ариза тасдиқ шуд ва мактаб илова гардид.",doneReject:"Ариза рад шуд.",noSchool:"Дар профил schoolId нест.",directorErr:"Мактаб бор нашуд. schoolId ва қоидаҳои Firestore-ро санҷед."}
+  ru:{
+    sent:"Заявка отправлена.\nОжидайте проверки администратором.",
+    sendErr:"Не удалось отправить заявку: ",
+    loginErr:"Ошибка входа: ",
+    profile:"Для этой учётной записи не найден профиль users/UID в Firestore.",
+    admin:"Вы вошли как главный администратор School Alliance.",
+    director:"Вы вошли как директор школы.",
+    role:"У этой учётной записи нет доступа к административным кабинетам.",
+    nonePending:"Новых заявок нет.",
+    noneApproved:"Подтверждённых школ пока нет.",
+    approve:"Подтвердить",
+    reject:"Отклонить",
+    pending:"Ожидает проверки",
+    approved:"Подтверждена",
+    rejected:"Отклонена",
+    working:"Выполняется…",
+    approveAsk:"Подтвердить заявку и добавить школу?",
+    rejectAsk:"Отклонить заявку?",
+    doneApprove:"Заявка подтверждена, школа добавлена.",
+    doneReject:"Заявка отклонена.",
+    noSchool:"В профиле не указан schoolId.",
+    directorErr:"Не удалось загрузить школу.\nПроверьте schoolId и правила Firestore."
+  },
+  tj:{
+    sent:"Ариза фиристода шуд.\nТасдиқи маъмурро интизор шавед.",
+    sendErr:"Ариза фиристода нашуд: ",
+    loginErr:"Хатои воридшавӣ: ",
+    profile:"Профили users/UID дар Firestore ёфт нашуд.",
+    admin:"Шумо ҳамчун маъмури асосии School Alliance ворид шудед.",
+    director:"Шумо ҳамчун директори мактаб ворид шудед.",
+    role:"Ин ҳисоб ба панели маъмурӣ дастрасӣ надорад.",
+    nonePending:"Аризаи нав нест.",
+    noneApproved:"Мактаби тасдиқшуда нест.",
+    approve:"Тасдиқ",
+    reject:"Рад кардан",
+    pending:"Интизори санҷиш",
+    approved:"Тасдиқ шуд",
+    rejected:"Рад шуд",
+    working:"Иҷро шуда истодааст…",
+    approveAsk:"Аризаро тасдиқ карда, мактабро илова мекунед?",
+    rejectAsk:"Аризаро рад мекунед?",
+    doneApprove:"Ариза тасдиқ шуд ва мактаб илова гардид.",
+    doneReject:"Ариза рад шуд.",
+    noSchool:"Дар профил schoolId нест.",
+    directorErr:"Мактаб бор нашуд.\nschoolId ва қоидаҳои Firestore-ро санҷед."
+  }
 };
+  
 const t=k=>dict[lang][k]||dict.ru[k]||k;
 function status(id,msg,hide=false){$(id).textContent=msg;$(id).hidden=hide;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
