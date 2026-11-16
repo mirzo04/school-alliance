@@ -279,8 +279,7 @@ $("teacherRegisterForm").addEventListener("submit",async e=>{
     await signOut(auth);
 
     $("teacherRegisterForm").reset();
-
-    status("teacherRegistrationStatus","Заявка отправлена! Ожидайте подтверждения директора школы.");
+ status("authStatus","Заявка отправлена! Ожидайте подтверждения директора школы.");
 showPage("login");
   }catch(err){
     status("teacherRegistrationStatus","Ошибка: "+err.message);
