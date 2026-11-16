@@ -797,13 +797,75 @@ $("studentForm").addEventListener("submit", async e=>{
     status("studentsError","Не удалось добавить ученика: "+err.message);
   }
 });
-onAuthStateChanged(auth,async user=>{currentUser=user;currentRole=null;profile=null;$("tabAdmin").hidden=true;$("tabDirector").hidden=true;$("logoutButton").hidden=!user;
-if(!user){$("authStatus").textContent="Подключение к Firebase…";showPage("login");return;}
-$("authStatus").textContent="Проверяем профиль пользователя…";
-try{let p=await getDoc(doc(db,"users",user.uid));if(!p.exists()){status("authStatus",t("profile"));showPage("login");return;}profile=p.data();currentRole=profile.role;
-if(currentRole==="platform_admin"){$("tabAdmin").hidden=false;status("authStatus",t("admin"));showPage("admin");await loadAdmin();}
-else if(currentRole==="school_director"){$("tabDirector").hidden=false;$("tabTeachers").hidden=false;$("tabStudents").hidden=false;status("authStatus",t("director"));showPage("director");await loadDirector();}
-else{status("authStatus",t("role"));showPage("login");}
-}catch(err){status("authStatus","Не удалось проверить профиль: "+err.message);showPage("login");}});
+onAuthStateChanged(auth,async user=>{
+  currentUser=user;
+  currentRole=null;
+  profile=null;
+
+  $("tabAdmin").hidden=true;
+  $("tabDirector").hidden=true;
+  $("logoutButton").hidden=!user;
+
+  if(!user){
+    $("authStatus").textContent="Подключение к Firebase…";
+    showPage("login");
+    return;
+  }
+
+  $("authStatus").textContent="Проверяем профиль пользователя…";
+
+  try{
+    let p=await getDoc(doc(db,"users",user.uid));
+
+    if(!p.exists()){
+      let application=await getDoc(
+        doc(db,"teacherApplications",user.uid)
+      );
+
+      if(application.exists()){
+        let a=application.data();
+
+        if(a.status==="pending"){
+          status("authStatus","Ваша заявка отправлена. Ожидайте подтверждения директора школы.");
+        }else if(a.status==="rejected"){
+          status("authStatus","Ваша заявка отклонена. Обратитесь к директору школы.");
+        }else{
+          status("authStatus","Заявка найдена. Ожидайте завершения проверки.");
+        }
+      }else{
+        status("authStatus","Профиль пользователя не найден.");
+      }
+
+      showPage("login");
+      return;
+    }
+
+    profile=p.data();
+    currentRole=profile.role;
+
+    if(currentRole==="platform_admin"){
+      $("tabAdmin").hidden=false;
+      status("authStatus",t("admin"));
+      showPage("admin");
+      await loadAdmin();
+
+    }else if(currentRole==="school_director"){
+      $("tabDirector").hidden=false;
+      $("tabTeachers").hidden=false;
+      $("tabStudents").hidden=false;
+      status("authStatus",t("director"));
+      showPage("director");
+      await loadDirector();
+
+    }else{
+      status("authStatus",t("role"));
+      showPage("login");
+    }
+
+  }catch(err){
+    status("authStatus","Не удалось проверить профиль: "+err.message);
+    showPage("login");
+  }
+});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
 </script></body></html>
