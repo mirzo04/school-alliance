@@ -239,7 +239,50 @@ const t=k=>dict[lang][k]||dict.ru[k]||k;
 function status(id,msg,hide=false){$(id).textContent=msg;$(id).hidden=hide;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function showPage(name){document.querySelectorAll(".page").forEach(p=>p.hidden=p.id!=="page-"+name);document.querySelectorAll(".tab[data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===name));}
-  
+$("teacherRegisterForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  const name=$("newTeacherName").value.trim();
+  const email=$("newTeacherEmail").value.trim();
+  const password=$("newTeacherPassword").value;
+  const schoolId=$("newTeacherSchool").value;
+  const subject=$("newTeacherSubject").value.trim();
+  const teachingClasses=$("newTeacherTeachingClasses").value.trim();
+  const classTeacherOf=$("newTeacherClassTeacher").value
+    .split(",").map(x=>x.trim()).filter(Boolean);
+  const phone=$("newTeacherPhone").value.trim();
+
+  if(!schoolId){
+    status("teacherRegistrationStatus","Выберите школу.");
+    return;
+  }
+
+  try{
+    status("teacherRegistrationStatus","Отправляем заявку…");
+
+    const credential=await createUserWithEmailAndPassword(
+      auth,email,password
+    );
+
+    await setDoc(doc(db,"teacherApplications",credential.user.uid),{
+      name,
+      email:credential.user.email,
+      schoolId,
+      subject,
+      teachingClasses,
+      classTeacherOf,
+      phone,
+      status:"pending",
+      createdAt:new Date().toISOString()
+    });
+
+    $("teacherRegisterForm").reset();
+    status("teacherRegistrationStatus","Заявка отправлена! Ожидайте подтверждения директора школы.");
+
+  }catch(err){
+    status("teacherRegistrationStatus","Ошибка: "+err.message);
+  }
+});  
 async function loadPublicSchools(){
   const select=$("newTeacherSchool");
   if(!select)return;
