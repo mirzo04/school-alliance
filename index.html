@@ -272,13 +272,16 @@ $("teacherRegisterForm").addEventListener("submit",async e=>{
       teachingClasses,
       classTeacherOf,
       phone,
-      status:"pending",
+            status:"pending",
       createdAt:new Date().toISOString()
     });
 
-    $("teacherRegisterForm").reset();
-    status("teacherRegistrationStatus","Заявка отправлена! Ожидайте подтверждения директора школы.");
+    await signOut(auth);
 
+    $("teacherRegisterForm").reset();
+
+    status("teacherRegistrationStatus","Заявка отправлена! Ожидайте подтверждения директора школы.");
+showPage("login");
   }catch(err){
     status("teacherRegistrationStatus","Ошибка: "+err.message);
   }
