@@ -518,6 +518,7 @@ async function loadDirector(){
 
     $("directorSchool").innerHTML=card(id,s.data());
     $("directorError").hidden=true;
+    await loadTeacherApplications();
 
   }catch(err){
     status("directorError",t("directorErr")+" "+err.message);
