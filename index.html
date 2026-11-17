@@ -1027,11 +1027,18 @@ onAuthStateChanged(auth,async user=>{
       showPage("director");
       await loadDirector();
 
-    }else{
-      status("authStatus",t("role"));
-      showPage("login");
-    }
+    }else if(currentRole==="teacher"){
+  status("authStatus","Вы вошли как учитель.");
 
+  $("teacherWelcome").textContent=
+    "Добро пожаловать, "+(profile.name||"учитель")+"!";
+
+  showPage("teacher");
+
+}else{
+  status("authStatus",t("role"));
+  showPage("login");
+    }
   }catch(err){
     status("authStatus","Не удалось проверить профиль: "+err.message);
     showPage("login");
