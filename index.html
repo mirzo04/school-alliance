@@ -197,8 +197,27 @@ footer{text-align:center;color:#718096;padding:18px;font-size:13px}@media(max-wi
 <div id="studentsList">Загрузка учеников…</div>
   <p id="studentsError" class="status" hidden></p>
   </section>
-</main><footer>School Alliance · Tajikistan</footer>
+<section class="page panel" id="page-teacher" hidden>
+  <h2>Личный кабинет учителя</h2>
 
+  <div id="teacherWelcome">
+    Добро пожаловать!
+  </div>
+
+  <hr>
+
+  <h3>Мои предметы и классы</h3>
+  <div id="teacherClasses">
+    Здесь будут отображаться ваши предметы и классы.
+  </div>
+
+  <h3>Мои ученики</h3>
+  <div id="teacherStudents">
+    Здесь будет список ваших учеников.
+  </div>
+</section>
+
+</main><footer>School Alliance · Tajikistan</footer>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
