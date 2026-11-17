@@ -1033,6 +1033,30 @@ onAuthStateChanged(auth,async user=>{
   $("teacherWelcome").textContent=
     "Добро пожаловать, "+(profile.name||"учитель")+"!";
 
+  try{
+    const teacherSnap = await getDoc(
+      doc(db,"schools",profile.schoolId,"teachers",user.uid)
+    );
+
+    if(!teacherSnap.exists()){
+      $("teacherClasses").textContent=
+        "Данные учителя не найдены.";
+    }else{
+      const teacherData = teacherSnap.data();
+
+      $("teacherClasses").style.whiteSpace="pre-line";
+
+      $("teacherClasses").textContent=
+        "Предмет: "+(teacherData.subject||"не указан")+
+        "\nПреподаёт: "+(teacherData.teachingClasses||"не указано")+
+        "\nКлассный руководитель: "+
+        ((teacherData.classTeacherOf||[]).join(", ")||"не назначен");
+    }
+  }catch(err){
+    $("teacherClasses").textContent=
+      "Не удалось загрузить данные: "+err.message;
+  }
+
   showPage("teacher");
 
 }else{
