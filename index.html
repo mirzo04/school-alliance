@@ -307,6 +307,69 @@ showPage("login");
   }
 });  
   
+
+async function approveTeacherApplication(teacherId,a){
+  if(currentRole!=="school_director"||!profile)return;
+
+  if(!confirm("Одобрить заявку учителя "+a.name+"?"))return;
+
+  try{
+    const batch=writeBatch(db);
+
+    const applicationRef=doc(db,"teacherApplications",teacherId);
+    const userRef=doc(db,"users",teacherId);
+    const teacherRef=doc(
+      db,"schools",profile.schoolId,"teachers",teacherId
+    );
+
+    batch.update(applicationRef,{status:"approved"});
+
+    batch.set(userRef,{
+      role:"teacher",
+      schoolId:profile.schoolId,
+      name:a.name,
+      email:a.email,
+      status:"active"
+    });
+
+    batch.set(teacherRef,{
+      name:a.name,
+      subject:a.subject,
+      phone:a.phone,
+      teachingClasses:a.teachingClasses,
+      classTeacherOf:a.classTeacherOf||[],
+      createdAt:a.createdAt
+    });
+
+    await batch.commit();
+
+    alert("Учитель успешно одобрен!");
+    await loadTeacherApplications();
+
+  }catch(err){
+    alert("Ошибка одобрения: "+err.message);
+  }
+}
+
+async function rejectTeacherApplication(teacherId,a){
+  if(currentRole!=="school_director"||!profile)return;
+
+  if(!confirm("Отклонить заявку учителя "+a.name+"?"))return;
+
+  try{
+    await updateDoc(
+      doc(db,"teacherApplications",teacherId),
+      {status:"rejected"}
+    );
+
+    alert("Заявка отклонена.");
+    await loadTeacherApplications();
+
+  }catch(err){
+    alert("Ошибка: "+err.message);
+  }
+}
+
 async function loadTeacherApplications(){
   if(currentRole!=="school_director"||!profile)return;
 
@@ -336,6 +399,7 @@ async function loadTeacherApplications(){
       card.className="panel";
 
       const info=document.createElement("p");
+      info.style.whiteSpace="pre-line";
       info.textContent=
         "ФИО: "+a.name+
         "\nПочта: "+a.email+
@@ -344,7 +408,19 @@ async function loadTeacherApplications(){
         "\nКлассный руководитель: "+(a.classTeacherOf||[]).join(", ")+
         "\nТелефон: "+a.phone;
 
+      const approve=document.createElement("button");
+      approve.textContent="Одобрить";
+      approve.className="primary";
+      approve.onclick=()=>approveTeacherApplication(d.id,a);
+
+      const reject=document.createElement("button");
+      reject.textContent="Отклонить";
+      reject.onclick=()=>rejectTeacherApplication(d.id,a);
+
       card.appendChild(info);
+      card.appendChild(approve);
+      card.appendChild(reject);
+
       list.appendChild(card);
     });
 
@@ -355,6 +431,7 @@ async function loadTeacherApplications(){
     status("teacherApplicationsError","Ошибка: "+err.message);
   }
 }
+  
   
 async function loadPublicSchools(){
   const select=$("newTeacherSchool");
