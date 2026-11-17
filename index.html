@@ -306,6 +306,56 @@ showPage("login");
     status("teacherRegistrationStatus","Ошибка: "+err.message);
   }
 });  
+  
+async function loadTeacherApplications(){
+  if(currentRole!=="school_director"||!profile)return;
+
+  const list=$("teacherApplicationsList");
+  list.textContent="Загрузка заявок…";
+
+  try{
+    const q=query(
+      collection(db,"teacherApplications"),
+      where("schoolId","==",profile.schoolId),
+      where("status","==","pending")
+    );
+
+    const snap=await getDocs(q);
+
+    list.innerHTML="";
+
+    if(snap.empty){
+      list.textContent="Новых заявок учителей пока нет.";
+      return;
+    }
+
+    snap.forEach(d=>{
+      const a=d.data();
+
+      const card=document.createElement("div");
+      card.className="panel";
+
+      const info=document.createElement("p");
+      info.textContent=
+        "ФИО: "+a.name+
+        "\nПочта: "+a.email+
+        "\nПредмет: "+a.subject+
+        "\nПреподаёт: "+a.teachingClasses+
+        "\nКлассный руководитель: "+(a.classTeacherOf||[]).join(", ")+
+        "\nТелефон: "+a.phone;
+
+      card.appendChild(info);
+      list.appendChild(card);
+    });
+
+    $("teacherApplicationsError").hidden=true;
+
+  }catch(err){
+    list.textContent="Не удалось загрузить заявки.";
+    status("teacherApplicationsError","Ошибка: "+err.message);
+  }
+}
+  
 async function loadPublicSchools(){
   const select=$("newTeacherSchool");
   if(!select)return;
