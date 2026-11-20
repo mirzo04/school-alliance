@@ -905,6 +905,10 @@ $("teacherForm").addEventListener("submit", async e=>{
   const subject=$("teacherSubject").value.trim();
   const phone=$("teacherPhone").value.trim();
   const teachingClassesText=$("teacherTeachingClasses").value;
+
+const teachingClasses=[...new Set(
+  teachingClassesText.split(",").map(c=>c.trim()).filter(Boolean)
+)];
 const classesText=$("teacherClassTeacherOf").value;
 
   if(!name||!subject)return;
@@ -924,7 +928,7 @@ await addDoc(collection(db,"schools",id,"teachers"),{
   name:name,
   subject:subject,
   phone:phone,
-  teachingClasses:teachingClassesText.trim(),
+  teachingClasses:teachingClasses,
   classTeacherOf:classTeacherOf,
   createdAt:new Date().toISOString()
 });
