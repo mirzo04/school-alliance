@@ -883,7 +883,7 @@ const classTeacherOf=[...new Set(
       name:name.trim(),
       subject:subject.trim(),
       phone:phone.trim(),
-teachingClasses:teachingClasses.join(", "),
+teachingClasses:teachingClasses,
 classTeacherOf:classTeacherOf,
       createdAt:old.createdAt||new Date().toISOString()
     });
