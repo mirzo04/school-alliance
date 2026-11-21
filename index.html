@@ -1051,10 +1051,65 @@ onAuthStateChanged(auth,async user=>{
       $("teacherClasses").style.whiteSpace="pre-line";
 
       $("teacherClasses").textContent=
-        "Предмет: "+(teacherData.subject||"не указан")+
-        "\nПреподаёт: "+(teacherData.teachingClasses||"не указано")+
-        "\nКлассный руководитель: "+
-        ((teacherData.classTeacherOf||[]).join(", ")||"не назначен");
+  "Предмет: "+(teacherData.subject||"не указан")+
+  "\nПреподаёт: "+
+  (Array.isArray(teacherData.teachingClasses)
+    ? teacherData.teachingClasses.join(", ")
+    : "не указано")+
+  "\nКлассный руководитель: "+
+  ((teacherData.classTeacherOf||[]).join(", ")||"не назначен");
+
+// Загружаем учеников назначенных классов
+const teacherClassesList=[...new Set([
+  ...(Array.isArray(teacherData.teachingClasses)
+    ? teacherData.teachingClasses : []),
+  ...(Array.isArray(teacherData.classTeacherOf)
+    ? teacherData.classTeacherOf : [])
+])];
+
+const teacherStudentsBox=$("teacherStudents");
+
+if(teacherClassesList.length===0){
+  teacherStudentsBox.textContent="Вам пока не назначены классы.";
+}else{
+  teacherStudentsBox.textContent="Загрузка учеников...";
+
+  try{
+    const studentResults=await Promise.all(
+      teacherClassesList.map(className=>
+        getDocs(query(
+          collection(db,"schools",profile.schoolId,"students"),
+          where("className","==",className)
+        ))
+      )
+    );
+
+    let students=[];
+
+    studentResults.forEach(snapshot=>{
+      snapshot.forEach(studentDoc=>{
+        students.push({
+          id:studentDoc.id,
+          ...studentDoc.data()
+        });
+      });
+    });
+
+    if(students.length===0){
+      teacherStudentsBox.textContent="В ваших классах пока нет учеников.";
+    }else{
+      teacherStudentsBox.innerHTML=students.map(student=>
+        "<div class='student-item'>"+
+        "<strong>"+esc(student.name||"Без имени")+"</strong>"+
+        "<br>Класс: "+esc(student.className||"не указан")+
+        "</div>"
+      ).join("");
+    }
+  }catch(studentErr){
+    teacherStudentsBox.textContent=
+      "Не удалось загрузить учеников: "+studentErr.message;
+  }
+  }
     }
   }catch(err){
     $("teacherClasses").textContent=
