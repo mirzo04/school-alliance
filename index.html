@@ -355,7 +355,10 @@ async function approveTeacherApplication(teacherId,a){
       name:a.name,
       subject:a.subject,
       phone:a.phone,
-      teachingClasses:a.teachingClasses,
+      teachingClasses:(a.teachingClasses||"")
+  .split(",")
+  .map(c=>c.trim())
+  .filter(Boolean),
       classTeacherOf:a.classTeacherOf||[],
       createdAt:a.createdAt
     });
